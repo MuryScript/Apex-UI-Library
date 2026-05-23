@@ -1,6 +1,8 @@
 local Tab = {}
 Tab.__index = Tab
 
+local TweenService = game:GetService("TweenService")
+
 local SectionModule = nil
 
 local function LazyLoad(Path)
@@ -66,10 +68,10 @@ function Tab:Build(Parent)
 	Layout.Parent = self.ScrollFrame
 
 	local Padding = Instance.new("UIPadding")
-	Padding.PaddingTop = UDim.new(0, 8)
+	Padding.PaddingTop    = UDim.new(0, 8)
 	Padding.PaddingBottom = UDim.new(0, 8)
-	Padding.PaddingLeft = UDim.new(0, 8)
-	Padding.PaddingRight = UDim.new(0, 8)
+	Padding.PaddingLeft   = UDim.new(0, 8)
+	Padding.PaddingRight  = UDim.new(0, 8)
 	Padding.Parent = self.ScrollFrame
 end
 
