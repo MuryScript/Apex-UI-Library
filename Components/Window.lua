@@ -3,7 +3,6 @@ Window.__index = Window
 
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
 
 local TabModule = nil
 local TopbarModule = nil
@@ -20,24 +19,24 @@ end
 function Window.New(Options)
 	local self = setmetatable({}, Window)
 
-	self.Title             = Options.Title or "ApexUI"
-	self.SubTitle          = Options.SubTitle or ""
-	self.Theme             = Options.Theme
-	self.Size              = Options.Size or UDim2.new(0, 520, 0, 440)
-	self.Position          = Options.Position or UDim2.new(0.5, -260, 0.5, -220)
-	self.MinimizeKey       = Options.MinimizeKey or Enum.KeyCode.RightShift
-	self.ScreenGui         = Options.ScreenGui
-	self.ThemeModule       = Options.ThemeModule
-	self.AnimateModule     = Options.AnimateModule
-	self.UtilModule        = Options.UtilModule
-	self.ConfigModule      = Options.ConfigModule
+	self.Title              = Options.Title or "ApexUI"
+	self.SubTitle           = Options.SubTitle or ""
+	self.Theme              = Options.Theme
+	self.Size               = Options.Size or UDim2.new(0, 520, 0, 440)
+	self.Position           = Options.Position or UDim2.new(0.5, -260, 0.5, -220)
+	self.MinimizeKey        = Options.MinimizeKey or Enum.KeyCode.RightShift
+	self.ScreenGui          = Options.ScreenGui
+	self.ThemeModule        = Options.ThemeModule
+	self.AnimateModule      = Options.AnimateModule
+	self.UtilModule         = Options.UtilModule
+	self.ConfigModule       = Options.ConfigModule
 	self.NotificationModule = Options.NotificationModule
 
-	self.Tabs              = {}
-	self.ActiveTab         = nil
-	self.Visible           = true
-	self.Minimized         = false
-	self.Connections       = {}
+	self.Tabs        = {}
+	self.ActiveTab   = nil
+	self.Visible     = true
+	self.Minimized   = false
+	self.Connections = {}
 
 	TabModule    = TabModule    or LazyLoad("Components/Tab.lua")
 	TopbarModule = TopbarModule or LazyLoad("Layout/Topbar.lua")
@@ -58,7 +57,7 @@ function Window:Build()
 
 	self.Root = Instance.new("Frame")
 	self.Root.Name = "ApexWindow"
-	self.Root.Size = self.Size
+	self.Root.Size = UDim2.new(0, 0, 0, 0)
 	self.Root.Position = self.Position
 	self.Root.BackgroundColor3 = T.Deep
 	self.Root.BorderSizePixel = 0
@@ -89,16 +88,15 @@ function Window:Build()
 	Shadow.Parent = self.Root
 
 	self.Topbar = TopbarModule.New({
-	Parent    = self.Root,
-	Title     = self.Title,
-	SubTitle  = self.SubTitle,
-	Theme     = T,
-	Window    = self,
-	Animate   = self.AnimateModule,
-	Util      = self.UtilModule,
-	ScreenGui = self.ScreenGui,
-})
-
+		Parent    = self.Root,
+		Title     = self.Title,
+		SubTitle  = self.SubTitle,
+		Theme     = T,
+		Window    = self,
+		Animate   = self.AnimateModule,
+		Util      = self.UtilModule,
+		ScreenGui = self.ScreenGui,
+	})
 
 	self.NavBar = Instance.new("Frame")
 	self.NavBar.Name = "NavBar"
@@ -125,6 +123,32 @@ function Window:Build()
 	NavPadding.PaddingTop = UDim.new(0, 8)
 	NavPadding.Parent = self.NavBar
 
+	local LogoFrame = Instance.new("Frame")
+	LogoFrame.Size = UDim2.new(0, 22, 0, 22)
+	LogoFrame.BackgroundColor3 = T.Bright
+	LogoFrame.BackgroundTransparency = 0.92
+	LogoFrame.BorderSizePixel = 0
+	LogoFrame.LayoutOrder = 0
+	LogoFrame.Parent = self.NavBar
+
+	local LogoCorner = Instance.new("UICorner")
+	LogoCorner.CornerRadius = UDim.new(0, 3)
+	LogoCorner.Parent = LogoFrame
+
+	local LogoStroke = Instance.new("UIStroke")
+	LogoStroke.Color = T.Wire
+	LogoStroke.Thickness = 1
+	LogoStroke.Parent = LogoFrame
+
+	local LogoLabel = Instance.new("TextLabel")
+	LogoLabel.Size = UDim2.new(1, 0, 1, 0)
+	LogoLabel.BackgroundTransparency = 1
+	LogoLabel.Text = "⬡"
+	LogoLabel.TextColor3 = T.Bright
+	LogoLabel.TextSize = 11
+	LogoLabel.Font = Enum.Font.GothamBold
+	LogoLabel.Parent = LogoFrame
+
 	self.ContentArea = Instance.new("Frame")
 	self.ContentArea.Name = "ContentArea"
 	self.ContentArea.Size = UDim2.new(1, -40, 1, -36)
@@ -134,9 +158,24 @@ function Window:Build()
 	self.ContentArea.ClipsDescendants = true
 	self.ContentArea.Parent = self.Root
 
-	self.AnimateModule:Tween(self.Root, { BackgroundTransparency = 0 }, "Reveal")
-
+	self:OpenAnimation()
 	self.UtilModule:MakeDraggable(self.Root, self.Topbar.Frame)
+end
+
+function Window:OpenAnimation()
+	self.Root.BackgroundTransparency = 1
+	self.Root.Size = UDim2.new(0, self.Size.X.Offset, 0, 0)
+
+	TweenService:Create(self.Root, TweenInfo.new(0.12, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+		Size = UDim2.new(0, self.Size.X.Offset, 0, 0),
+		BackgroundTransparency = 0,
+	}):Play()
+
+	task.delay(0.08, function()
+		TweenService:Create(self.Root, TweenInfo.new(0.45, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+			Size = self.Size,
+		}):Play()
+	end)
 end
 
 function Window:AddTab(Options)
@@ -205,10 +244,8 @@ function Window:SelectTab(Tab)
 	if self.ActiveTab == Tab then return end
 
 	if self.ActiveTab then
-		local PrevButton = self.ActiveTab.NavButton
-		local PrevBar = self.ActiveTab.ActiveBar
-		self.AnimateModule:Tween(PrevButton, { TextColor3 = self.Theme.Ghost }, "Snappy")
-		self.AnimateModule:Tween(PrevBar, { Size = UDim2.new(0, 2, 0, 0) }, "Snappy")
+		self.AnimateModule:Tween(self.ActiveTab.NavButton, { TextColor3 = self.Theme.Ghost }, "Snappy")
+		self.AnimateModule:Tween(self.ActiveTab.ActiveBar, { Size = UDim2.new(0, 2, 0, 0) }, "Snappy")
 		self.ActiveTab.Frame.Visible = false
 	end
 
@@ -241,19 +278,25 @@ end
 function Window:Show()
 	self.Root.Visible = true
 	self.Visible = true
-	self.AnimateModule:Tween(self.Root, {
-		Size = self.Size,
+	self.Root.Size = UDim2.new(0, self.Size.X.Offset, 0, 0)
+	self.Root.BackgroundTransparency = 1
+	TweenService:Create(self.Root, TweenInfo.new(0.1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
 		BackgroundTransparency = 0,
-	}, "Spring")
+	}):Play()
+	task.delay(0.06, function()
+		TweenService:Create(self.Root, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+			Size = self.Size,
+		}):Play()
+	end)
 end
 
 function Window:Hide()
 	self.Visible = false
-	local Tween = self.AnimateModule:Tween(self.Root, {
-		Size = UDim2.new(self.Size.X.Scale, self.Size.X.Offset, 0, 0),
+	TweenService:Create(self.Root, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
+		Size = UDim2.new(0, self.Size.X.Offset, 0, 0),
 		BackgroundTransparency = 1,
-	}, "Collapse")
-	Tween.Completed:Connect(function()
+	}):Play()
+	task.delay(0.25, function()
 		if not self.Visible then
 			self.Root.Visible = false
 		end
