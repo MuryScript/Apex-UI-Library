@@ -2,14 +2,15 @@ local Mobile = {}
 Mobile.__index = Mobile
 
 local UserInputService = game:GetService("UserInputService")
+local TweenService = game:GetService("TweenService")
 
 function Mobile:Adapt(Window)
 	if not UserInputService.TouchEnabled then return end
 
 	local Screen = workspace.CurrentCamera.ViewportSize
-	local IsMobile = Screen.X < 600
+	local IsSmall = Screen.X < 600
 
-	if IsMobile then
+	if IsSmall then
 		self:CompactLayout(Window)
 	end
 
@@ -19,8 +20,11 @@ function Mobile:Adapt(Window)
 end
 
 function Mobile:CompactLayout(Window)
-	Window.Root.Size = UDim2.new(0.92, 0, 0, 400)
-	Window.Root.Position = UDim2.new(0.04, 0, 0.5, -200)
+	local Screen = workspace.CurrentCamera.ViewportSize
+
+	Window.Root.Size = UDim2.new(0, Screen.X * 0.88, 0, Screen.Y * 0.62)
+	Window.Root.Position = UDim2.new(0.06, 0, 0.18, 0)
+	Window.Size = Window.Root.Size
 
 	Window.NavBar.Size = UDim2.new(1, 0, 0, 36)
 	Window.NavBar.Position = UDim2.new(0, 0, 0, 36)
@@ -47,12 +51,10 @@ function Mobile:ScaleForTouch(Window)
 		for _, Section in ipairs(Tab.Sections) do
 			for _, Element in ipairs(Section.Elements) do
 				if Element.Frame then
-					local CurrentSize = Element.Frame.Size
+					local S = Element.Frame.Size
 					Element.Frame.Size = UDim2.new(
-						CurrentSize.X.Scale,
-						CurrentSize.X.Offset,
-						CurrentSize.Y.Scale,
-						math.max(CurrentSize.Y.Offset, 40)
+						S.X.Scale, S.X.Offset,
+						S.Y.Scale, math.max(S.Y.Offset, 40)
 					)
 				end
 			end
@@ -61,35 +63,25 @@ function Mobile:ScaleForTouch(Window)
 end
 
 function Mobile:AddTouchDrag(Window)
-	local Dragging = false
+	local Dragging  = false
 	local DragStart = nil
-	local StartPos = nil
-	local TapTime = nil
+	local StartPos  = nil
 
 	local BeganConn = Window.Topbar.Frame.InputBegan:Connect(function(Input)
 		if Input.UserInputType == Enum.UserInputType.Touch then
-			Dragging = true
+			Dragging  = true
 			DragStart = Input.Position
-			StartPos = Window.Root.Position
-			TapTime = tick()
+			StartPos  = Window.Root.Position
 		end
 	end)
 
 	local ChangedConn = UserInputService.InputChanged:Connect(function(Input)
 		if not Dragging then return end
 		if Input.UserInputType == Enum.UserInputType.Touch then
-			local Delta = Input.Position - DragStart
+			local Delta  = Input.Position - DragStart
 			local Screen = workspace.CurrentCamera.ViewportSize
-			local NewX = math.clamp(
-				StartPos.X.Offset + Delta.X,
-				0,
-				Screen.X - Window.Root.AbsoluteSize.X
-			)
-			local NewY = math.clamp(
-				StartPos.Y.Offset + Delta.Y,
-				0,
-				Screen.Y - Window.Root.AbsoluteSize.Y
-			)
+			local NewX = math.clamp(StartPos.X.Offset + Delta.X, 0, Screen.X - Window.Root.AbsoluteSize.X)
+			local NewY = math.clamp(StartPos.Y.Offset + Delta.Y, 0, Screen.Y - Window.Root.AbsoluteSize.Y)
 			Window.Root.Position = UDim2.new(0, NewX, 0, NewY)
 		end
 	end)
@@ -106,7 +98,7 @@ function Mobile:AddTouchDrag(Window)
 end
 
 function Mobile:AddSwipeToClose(Window)
-	local SwipeStart = nil
+	local SwipeStart    = nil
 	local SwipeThreshold = 80
 
 	local BeganConn = Window.Root.InputBegan:Connect(function(Input)
@@ -118,15 +110,12 @@ function Mobile:AddSwipeToClose(Window)
 	local EndedConn = Window.Root.InputEnded:Connect(function(Input)
 		if Input.UserInputType ~= Enum.UserInputType.Touch then return end
 		if not SwipeStart then return end
-
 		local Delta = Input.Position - SwipeStart
-		local AbsX = math.abs(Delta.X)
-		local AbsY = math.abs(Delta.Y)
-
+		local AbsX  = math.abs(Delta.X)
+		local AbsY  = math.abs(Delta.Y)
 		if AbsY > SwipeThreshold and AbsY > AbsX and Delta.Y < 0 then
 			Window:Hide()
 		end
-
 		SwipeStart = nil
 	end)
 
