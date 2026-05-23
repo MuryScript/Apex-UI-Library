@@ -17,7 +17,6 @@ local function LazyLoad(Path)
 	return Result
 end
 
-
 function Window.New(Options)
 	local self = setmetatable({}, Window)
 
