@@ -85,10 +85,15 @@ function ApexUI:Init(Options)
 	NotificationModule:Init(ScreenGui)
 	PluginModule:Init(self)
 
+	local BootModule = Fetch("Layout/BootScreen.lua")
+	BootModule.New({
+		ScreenGui = ScreenGui,
+		OnDone    = function() end,
+	})
+
 	Initialized = true
 	return self
 end
-
 
 function ApexUI:CreateWindow(Options)
 	assert(Initialized, "[ApexUI] Call ApexUI:Init() before CreateWindow()")
