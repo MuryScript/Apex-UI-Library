@@ -50,19 +50,30 @@ function Topbar:Build(Parent)
 	self.StatusDot = StatusDot
 
 	local TitleLabel = Instance.new("TextLabel")
-	TitleLabel.Name = "TitleLabel"
-	TitleLabel.Size = UDim2.new(0, 0, 0, 14)
-	TitleLabel.AutomaticSize = Enum.AutomaticSize.X
-	TitleLabel.Position = UDim2.new(0, 22, 0.5, -7)
-	TitleLabel.BackgroundTransparency = 1
-	TitleLabel.Text = self.Title:upper()
-	TitleLabel.TextColor3 = T.White
-	TitleLabel.TextSize = 11
-	TitleLabel.Font = Enum.Font.GothamBold
-	TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-	TitleLabel.Parent = self.Frame
+TitleLabel.Name = "TitleLabel"
+TitleLabel.Size = UDim2.new(0, 0, 0, 14)
+TitleLabel.AutomaticSize = Enum.AutomaticSize.X
+TitleLabel.Position = UDim2.new(0, 22, 0.5, -7)
+TitleLabel.BackgroundTransparency = 1
+TitleLabel.Text = ""
+TitleLabel.TextColor3 = T.White
+TitleLabel.TextSize = 11
+TitleLabel.Font = Enum.Font.GothamBold
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Parent = self.Frame
 
-	self.TitleLabel = TitleLabel
+self.TitleLabel = TitleLabel
+
+local FullTitle = self.Title:upper()
+local Index = 0
+task.spawn(function()
+	while Index < #FullTitle do
+		Index = Index + 1
+		TitleLabel.Text = FullTitle:sub(1, Index)
+		task.wait(0.04)
+	end
+end)
+
 
 	local Divider = Instance.new("TextLabel")
 	Divider.Name = "Divider"
