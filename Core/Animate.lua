@@ -60,7 +60,7 @@ function Animate:Tween(Object, Properties, Preset, Overrides)
 	local TweenObj = TweenService:Create(Object, Info, Properties)
 	TweenObj:Play()
 	return TweenObj
-}
+end
 
 function Animate:TweenAsync(Object, Properties, Preset, Overrides)
 	local TweenObj = self:Tween(Object, Properties, Preset, Overrides)
