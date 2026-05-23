@@ -10,10 +10,18 @@ local TopbarModule = nil
 local MobileModule = nil
 
 local function LazyLoad(Path)
-	local Success, Result = pcall(function()
-		return loadstring(game:HttpGet("https://raw.githubusercontent.com/MuryScript/Apex-UI-Library/main/" .. Path))()
-	end)
-	assert(Success, "[ApexUI] Failed to load: " .. Path)
+	local Result
+	for I = 1, 3 do
+		local Success, Data = pcall(function()
+			return loadstring(game:HttpGet("https://raw.githubusercontent.com/MuryScript/Apex-UI-Library/main/" .. Path))()
+		end)
+		if Success then
+			Result = Data
+			break
+		end
+		task.wait(0.5)
+	end
+	assert(Result, "[ApexUI] Failed to load: " .. Path)
 	return Result
 end
 
