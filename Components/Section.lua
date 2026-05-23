@@ -1,6 +1,8 @@
 local Section = {}
 Section.__index = Section
 
+local TweenService = game:GetService("TweenService")
+
 local ToggleModule = nil
 local SliderModule = nil
 local DropdownModule = nil
@@ -57,89 +59,37 @@ function Section:Build(Parent)
 	Stroke.Thickness = 1
 	Stroke.Parent = self.Frame
 
-	local TLBracket = Instance.new("Frame")
-	TLBracket.Name = "TLBracket"
-	TLBracket.Size = UDim2.new(0, 7, 0, 7)
-	TLBracket.Position = UDim2.new(0, 0, 0, 0)
-	TLBracket.BackgroundTransparency = 1
-	TLBracket.BorderSizePixel = 0
-	TLBracket.Parent = self.Frame
+	local function MakeBracket(XScale, YScale, XOffset, YOffset, HPos, VPos)
+		local Bracket = Instance.new("Frame")
+		Bracket.Size = UDim2.new(0, 0, 0, 0)
+		Bracket.Position = UDim2.new(XScale, XOffset, YScale, YOffset)
+		Bracket.BackgroundTransparency = 1
+		Bracket.BorderSizePixel = 0
+		Bracket.Parent = self.Frame
 
-	local TLH = Instance.new("Frame")
-	TLH.Size = UDim2.new(1, 0, 0, 1)
-	TLH.BackgroundColor3 = T.Ghost
-	TLH.BorderSizePixel = 0
-	TLH.Parent = TLBracket
+		local H = Instance.new("Frame")
+		H.Size = UDim2.new(1, 0, 0, 1)
+		H.Position = HPos
+		H.BackgroundColor3 = T.Ghost
+		H.BorderSizePixel = 0
+		H.Parent = Bracket
 
-	local TLV = Instance.new("Frame")
-	TLV.Size = UDim2.new(0, 1, 1, 0)
-	TLV.BackgroundColor3 = T.Ghost
-	TLV.BorderSizePixel = 0
-	TLV.Parent = TLBracket
+		local V = Instance.new("Frame")
+		V.Size = UDim2.new(0, 1, 1, 0)
+		V.Position = VPos
+		V.BackgroundColor3 = T.Ghost
+		V.BorderSizePixel = 0
+		V.Parent = Bracket
 
-	local TRBracket = Instance.new("Frame")
-	TRBracket.Name = "TRBracket"
-	TRBracket.Size = UDim2.new(0, 7, 0, 7)
-	TRBracket.Position = UDim2.new(1, -7, 0, 0)
-	TRBracket.BackgroundTransparency = 1
-	TRBracket.BorderSizePixel = 0
-	TRBracket.Parent = self.Frame
+		TweenService:Create(Bracket, TweenInfo.new(0.4, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+			Size = UDim2.new(0, 7, 0, 7),
+		}):Play()
+	end
 
-	local TRH = Instance.new("Frame")
-	TRH.Size = UDim2.new(1, 0, 0, 1)
-	TRH.BackgroundColor3 = T.Ghost
-	TRH.BorderSizePixel = 0
-	TRH.Parent = TRBracket
-
-	local TRV = Instance.new("Frame")
-	TRV.Size = UDim2.new(0, 1, 1, 0)
-	TRV.Position = UDim2.new(1, -1, 0, 0)
-	TRV.BackgroundColor3 = T.Ghost
-	TRV.BorderSizePixel = 0
-	TRV.Parent = TRBracket
-
-	local BLBracket = Instance.new("Frame")
-	BLBracket.Name = "BLBracket"
-	BLBracket.Size = UDim2.new(0, 7, 0, 7)
-	BLBracket.Position = UDim2.new(0, 0, 1, -7)
-	BLBracket.BackgroundTransparency = 1
-	BLBracket.BorderSizePixel = 0
-	BLBracket.Parent = self.Frame
-
-	local BLH = Instance.new("Frame")
-	BLH.Size = UDim2.new(1, 0, 0, 1)
-	BLH.Position = UDim2.new(0, 0, 1, -1)
-	BLH.BackgroundColor3 = T.Ghost
-	BLH.BorderSizePixel = 0
-	BLH.Parent = BLBracket
-
-	local BLV = Instance.new("Frame")
-	BLV.Size = UDim2.new(0, 1, 1, 0)
-	BLV.BackgroundColor3 = T.Ghost
-	BLV.BorderSizePixel = 0
-	BLV.Parent = BLBracket
-
-	local BRBracket = Instance.new("Frame")
-	BRBracket.Name = "BRBracket"
-	BRBracket.Size = UDim2.new(0, 7, 0, 7)
-	BRBracket.Position = UDim2.new(1, -7, 1, -7)
-	BRBracket.BackgroundTransparency = 1
-	BRBracket.BorderSizePixel = 0
-	BRBracket.Parent = self.Frame
-
-	local BRH = Instance.new("Frame")
-	BRH.Size = UDim2.new(1, 0, 0, 1)
-	BRH.Position = UDim2.new(0, 0, 1, -1)
-	BRH.BackgroundColor3 = T.Ghost
-	BRH.BorderSizePixel = 0
-	BRH.Parent = BRBracket
-
-	local BRV = Instance.new("Frame")
-	BRV.Size = UDim2.new(0, 1, 1, 0)
-	BRV.Position = UDim2.new(1, -1, 0, 0)
-	BRV.BackgroundColor3 = T.Ghost
-	BRV.BorderSizePixel = 0
-	BRV.Parent = BRBracket
+	MakeBracket(0, 0, 0,  0,  UDim2.new(0,0,0,0),   UDim2.new(0,0,0,0))
+	MakeBracket(1, 0, -7, 0,  UDim2.new(0,0,0,0),   UDim2.new(1,-1,0,0))
+	MakeBracket(0, 1, 0,  -7, UDim2.new(0,0,1,-1),  UDim2.new(0,0,0,0))
+	MakeBracket(1, 1, -7, -7, UDim2.new(0,0,1,-1),  UDim2.new(1,-1,0,0))
 
 	if self.Name then
 		local HeaderLabel = Instance.new("TextLabel")
@@ -188,10 +138,10 @@ function Section:Build(Parent)
 	ContentLayout.Parent = self.Content
 
 	local ContentPadding = Instance.new("UIPadding")
-	ContentPadding.PaddingTop = UDim.new(0, 10)
+	ContentPadding.PaddingTop    = UDim.new(0, 10)
 	ContentPadding.PaddingBottom = UDim.new(0, 8)
-	ContentPadding.PaddingLeft = UDim.new(0, 8)
-	ContentPadding.PaddingRight = UDim.new(0, 8)
+	ContentPadding.PaddingLeft   = UDim.new(0, 8)
+	ContentPadding.PaddingRight  = UDim.new(0, 8)
 	ContentPadding.Parent = self.Content
 end
 
@@ -240,6 +190,7 @@ function Section:AddDropdown(Options)
 		Name          = Options.Name,
 		Options       = Options.Options,
 		Default       = Options.Default,
+		Multi         = Options.Multi,
 		Flag          = Options.Flag,
 		Callback      = Options.Callback,
 		Parent        = self.Content,
@@ -323,11 +274,11 @@ end
 function Section:AddLabel(Options)
 	LabelModule = LabelModule or LazyLoad("Components/Label.lua")
 	local Element = LabelModule.New({
-		Text          = Options.Text,
-		Color         = Options.Color,
-		Parent        = self.Content,
-		Theme         = self.Theme,
-		LayoutOrder   = #self.Elements + 1,
+		Text        = Options.Text,
+		Color       = Options.Color,
+		Parent      = self.Content,
+		Theme       = self.Theme,
+		LayoutOrder = #self.Elements + 1,
 	})
 	table.insert(self.Elements, Element)
 	return Element
@@ -336,9 +287,9 @@ end
 function Section:AddSeparator()
 	SeparatorModule = SeparatorModule or LazyLoad("Components/Separator.lua")
 	local Element = SeparatorModule.New({
-		Parent        = self.Content,
-		Theme         = self.Theme,
-		LayoutOrder   = #self.Elements + 1,
+		Parent      = self.Content,
+		Theme       = self.Theme,
+		LayoutOrder = #self.Elements + 1,
 	})
 	table.insert(self.Elements, Element)
 	return Element
