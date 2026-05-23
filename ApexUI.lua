@@ -51,12 +51,27 @@ function ApexUI:Init(Options)
 	if Initialized then return self end
 	Options = Options or {}
 
-	ThemeModule       = Fetch("Core/Theme.lua")
-	AnimateModule     = Fetch("Core/Animate.lua")
-	UtilModule        = Fetch("Core/Util.lua")
-	ConfigModule      = Fetch("Core/Config.lua")
-	NotificationModule = Fetch("Layout/Notification.lua")
-	PluginModule      = Fetch("Plugins/PluginHandler.lua")
+	ThemeModule            = Fetch("Core/Theme.lua")
+	AnimateModule          = Fetch("Core/Animate.lua")
+	UtilModule             = Fetch("Core/Util.lua")
+	ConfigModule           = Fetch("Core/Config.lua")
+	NotificationModule     = Fetch("Layout/Notification.lua")
+	PluginModule           = Fetch("Plugins/PluginHandler.lua")
+
+	Fetch("Components/Window.lua")
+	Fetch("Components/Tab.lua")
+	Fetch("Components/Section.lua")
+	Fetch("Components/Toggle.lua")
+	Fetch("Components/Slider.lua")
+	Fetch("Components/Dropdown.lua")
+	Fetch("Components/Keybind.lua")
+	Fetch("Components/Button.lua")
+	Fetch("Components/TextInput.lua")
+	Fetch("Components/ColorPicker.lua")
+	Fetch("Components/Label.lua")
+	Fetch("Components/Separator.lua")
+	Fetch("Layout/Topbar.lua")
+	Fetch("Layout/Mobile.lua")
 
 	if Options.Theme then
 		ThemeModule:Set(Options.Theme)
@@ -73,6 +88,7 @@ function ApexUI:Init(Options)
 	Initialized = true
 	return self
 end
+
 
 function ApexUI:CreateWindow(Options)
 	assert(Initialized, "[ApexUI] Call ApexUI:Init() before CreateWindow()")
