@@ -37,6 +37,14 @@ function ColorPicker.New(Options)
 	return self
 end
 
+function ColorPicker:ToHex(Color)
+	return string.format("%02X%02X%02X",
+		math.round(Color.R * 255),
+		math.round(Color.G * 255),
+		math.round(Color.B * 255)
+	)
+end
+
 function ColorPicker:Build(Parent)
 	local T = self.Theme
 
@@ -49,12 +57,12 @@ function ColorPicker:Build(Parent)
 	self.Frame.ClipsDescendants = false
 	self.Frame.Parent = Parent
 
-	local Padding = Instance.new("UIPadding")
-	Padding.PaddingTop = UDim.new(0, 6)
-	Padding.PaddingBottom = UDim.new(0, 6)
-	Padding.PaddingLeft = UDim.new(0, 2)
-	Padding.PaddingRight = UDim.new(0, 2)
-	Padding.Parent = self.Frame
+	local OuterPadding = Instance.new("UIPadding")
+	OuterPadding.PaddingTop    = UDim.new(0, 6)
+	OuterPadding.PaddingBottom = UDim.new(0, 6)
+	OuterPadding.PaddingLeft   = UDim.new(0, 2)
+	OuterPadding.PaddingRight  = UDim.new(0, 2)
+	OuterPadding.Parent = self.Frame
 
 	local TopRow = Instance.new("Frame")
 	TopRow.Name = "TopRow"
@@ -63,7 +71,6 @@ function ColorPicker:Build(Parent)
 	TopRow.Parent = self.Frame
 
 	self.NameLabel = Instance.new("TextLabel")
-	self.NameLabel.Name = "NameLabel"
 	self.NameLabel.Size = UDim2.new(1, -36, 1, 0)
 	self.NameLabel.BackgroundTransparency = 1
 	self.NameLabel.Text = self.Name
@@ -74,7 +81,6 @@ function ColorPicker:Build(Parent)
 	self.NameLabel.Parent = TopRow
 
 	self.PreviewButton = Instance.new("TextButton")
-	self.PreviewButton.Name = "PreviewButton"
 	self.PreviewButton.Size = UDim2.new(0, 28, 0, 18)
 	self.PreviewButton.Position = UDim2.new(1, -28, 0.5, -9)
 	self.PreviewButton.BackgroundColor3 = self.Value
@@ -112,10 +118,10 @@ function ColorPicker:Build(Parent)
 	PickerStroke.Parent = self.PickerFrame
 
 	local PickerPadding = Instance.new("UIPadding")
-	PickerPadding.PaddingTop = UDim.new(0, 8)
+	PickerPadding.PaddingTop    = UDim.new(0, 8)
 	PickerPadding.PaddingBottom = UDim.new(0, 8)
-	PickerPadding.PaddingLeft = UDim.new(0, 8)
-	PickerPadding.PaddingRight = UDim.new(0, 8)
+	PickerPadding.PaddingLeft   = UDim.new(0, 8)
+	PickerPadding.PaddingRight  = UDim.new(0, 8)
 	PickerPadding.Parent = self.PickerFrame
 
 	local PickerLayout = Instance.new("UIListLayout")
@@ -139,9 +145,9 @@ function ColorPicker:Build(Parent)
 	SVCorner.Parent = self.SVPicker
 
 	self.SVCursor = Instance.new("Frame")
-	self.SVCursor.Name = "SVCursor"
 	self.SVCursor.Size = UDim2.new(0, 8, 0, 8)
 	self.SVCursor.AnchorPoint = Vector2.new(0.5, 0.5)
+	self.SVCursor.Position = UDim2.new(self.S, 0, 1 - self.V, 0)
 	self.SVCursor.BackgroundColor3 = Color3.new(1, 1, 1)
 	self.SVCursor.BorderSizePixel = 0
 	self.SVCursor.ZIndex = 7
@@ -171,7 +177,6 @@ function ColorPicker:Build(Parent)
 	HueCorner.Parent = self.HueBar
 
 	self.HueCursor = Instance.new("Frame")
-	self.HueCursor.Name = "HueCursor"
 	self.HueCursor.Size = UDim2.new(0, 4, 1, 4)
 	self.HueCursor.AnchorPoint = Vector2.new(0.5, 0.5)
 	self.HueCursor.Position = UDim2.new(self.H, 0, 0.5, 0)
@@ -197,7 +202,6 @@ function ColorPicker:Build(Parent)
 	BottomRow.Parent = self.PickerFrame
 
 	self.HexInput = Instance.new("TextBox")
-	self.HexInput.Name = "HexInput"
 	self.HexInput.Size = UDim2.new(1, -36, 1, 0)
 	self.HexInput.BackgroundColor3 = T.Lift
 	self.HexInput.BorderSizePixel = 0
@@ -220,21 +224,20 @@ function ColorPicker:Build(Parent)
 	HexStroke.Parent = self.HexInput
 
 	self.ColorPreview = Instance.new("Frame")
-	self.ColorPreview.Name = "ColorPreview"
 	self.ColorPreview.Size = UDim2.new(0, 28, 1, 0)
 	self.ColorPreview.Position = UDim2.new(1, -28, 0, 0)
 	self.ColorPreview.BackgroundColor3 = self.Value
 	self.ColorPreview.BorderSizePixel = 0
 	self.ColorPreview.Parent = BottomRow
 
-	local PreviewCorner2 = Instance.new("UICorner")
-	PreviewCorner2.CornerRadius = UDim.new(0, 3)
-	PreviewCorner2.Parent = self.ColorPreview
+	local ColorPreviewCorner = Instance.new("UICorner")
+	ColorPreviewCorner.CornerRadius = UDim.new(0, 3)
+	ColorPreviewCorner.Parent = self.ColorPreview
 
-	self.PickerHeight = 120 + 12 + 20 + 8 + 8 + 6 + 6
+	self.PickerHeight = 162
 
 	local function UpdateFromSV(Input)
-		local Pos = self.SVPicker.AbsolutePosition
+		local Pos  = self.SVPicker.AbsolutePosition
 		local Size = self.SVPicker.AbsoluteSize
 		local X = math.clamp(Input.Position.X - Pos.X, 0, Size.X)
 		local Y = math.clamp(Input.Position.Y - Pos.Y, 0, Size.Y)
@@ -244,7 +247,7 @@ function ColorPicker:Build(Parent)
 	end
 
 	local function UpdateFromHue(Input)
-		local Pos = self.HueBar.AbsolutePosition
+		local Pos  = self.HueBar.AbsolutePosition
 		local Size = self.HueBar.AbsoluteSize
 		local X = math.clamp(Input.Position.X - Pos.X, 0, Size.X)
 		self.H = X / Size.X
@@ -270,7 +273,7 @@ function ColorPicker:Build(Parent)
 	local MoveConn = UserInputService.InputChanged:Connect(function(Input)
 		if Input.UserInputType == Enum.UserInputType.MouseMovement
 			or Input.UserInputType == Enum.UserInputType.Touch then
-			if self.DraggingSV then UpdateFromSV(Input) end
+			if self.DraggingSV  then UpdateFromSV(Input)  end
 			if self.DraggingHue then UpdateFromHue(Input) end
 		end
 	end)
@@ -278,7 +281,7 @@ function ColorPicker:Build(Parent)
 	local UpConn = UserInputService.InputEnded:Connect(function(Input)
 		if Input.UserInputType == Enum.UserInputType.MouseButton1
 			or Input.UserInputType == Enum.UserInputType.Touch then
-			self.DraggingSV = false
+			self.DraggingSV  = false
 			self.DraggingHue = false
 		end
 	end)
@@ -286,10 +289,8 @@ function ColorPicker:Build(Parent)
 	local HexConn = self.HexInput.FocusLost:Connect(function()
 		local Hex = self.HexInput.Text:gsub("#", "")
 		if #Hex == 6 then
-			local Success, Col = pcall(function()
-				return Color3.fromHex(Hex)
-			end)
-			if Success then
+			local Ok, Col = pcall(Color3.fromHex, Hex)
+			if Ok then
 				self.H, self.S, self.V = Color3.toHSV(Col)
 				self:UpdateColor()
 			end
@@ -311,38 +312,22 @@ function ColorPicker:Build(Parent)
 	table.insert(self.Connections, UpConn)
 	table.insert(self.Connections, HexConn)
 	table.insert(self.Connections, ToggleConn)
-
-	self:RefreshCursors()
-end
-
-function ColorPicker:ToHex(Color)
-	return string.format("%02X%02X%02X",
-		math.round(Color.R * 255),
-		math.round(Color.G * 255),
-		math.round(Color.B * 255)
-	)
 end
 
 function ColorPicker:UpdateColor()
 	self.Value = Color3.fromHSV(self.H, self.S, self.V)
 	self.SVPicker.BackgroundColor3 = Color3.fromHSV(self.H, 1, 1)
 	self.PreviewButton.BackgroundColor3 = self.Value
-	self.ColorPreview.BackgroundColor3 = self.Value
+	self.ColorPreview.BackgroundColor3  = self.Value
 	self.HexInput.Text = self:ToHex(self.Value)
-	self:RefreshCursors()
-
+	self.SVCursor.Position  = UDim2.new(self.S, 0, 1 - self.V, 0)
+	self.HueCursor.Position = UDim2.new(self.H, 0, 0.5, 0)
 	if self.Flag and self.ConfigModule then
 		self.ConfigModule:Set(self.Flag, { R = self.Value.R, G = self.Value.G, B = self.Value.B })
 	end
-
 	if self.Callback then
 		pcall(self.Callback, self.Value)
 	end
-end
-
-function ColorPicker:RefreshCursors()
-	self.SVCursor.Position = UDim2.new(self.S, 0, 1 - self.V, 0)
-	self.HueCursor.Position = UDim2.new(self.H, 0, 0.5, 0)
 end
 
 function ColorPicker:OpenPickerFrame()
@@ -367,11 +352,7 @@ end
 function ColorPicker:SetValue(Color)
 	self.Value = Color
 	self.H, self.S, self.V = Color3.toHSV(Color)
-	self.SVPicker.BackgroundColor3 = Color3.fromHSV(self.H, 1, 1)
-	self.PreviewButton.BackgroundColor3 = Color
-	self.ColorPreview.BackgroundColor3 = Color
-	self.HexInput.Text = self:ToHex(Color)
-	self:RefreshCursors()
+	self:UpdateColor()
 	if self.Flag and self.ConfigModule then
 		self.ConfigModule:Set(self.Flag, { R = Color.R, G = Color.G, B = Color.B })
 	end
@@ -386,10 +367,10 @@ end
 
 function ColorPicker:ApplyTheme(T)
 	self.Theme = T
-	self.NameLabel.TextColor3 = T.Bright
-	self.PreviewStroke.Color = T.Wire
-	self.HexInput.BackgroundColor3 = T.Lift
-	self.HexInput.TextColor3 = T.White
+	self.NameLabel.TextColor3       = T.Bright
+	self.PreviewStroke.Color        = T.Wire
+	self.HexInput.BackgroundColor3  = T.Lift
+	self.HexInput.TextColor3        = T.White
 	self.HexInput.PlaceholderColor3 = T.Ghost
 end
 
