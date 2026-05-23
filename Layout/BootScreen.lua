@@ -3,6 +3,7 @@ BootScreen.__index = BootScreen
 
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
+local CoreGui = game:GetService("CoreGui")
 
 local BootLines = {
 	"INITIALIZING APEX RUNTIME...",
@@ -18,23 +19,36 @@ local BootLines = {
 
 function BootScreen.New(Options)
 	local self = setmetatable({}, BootScreen)
-	self.ScreenGui = Options.ScreenGui
-	self.OnDone    = Options.OnDone or function() end
+	self.OnDone = Options.OnDone or function() end
 	self:Build()
 	self:Play()
 	return self
 end
 
 function BootScreen:Build()
+	self.Gui = Instance.new("ScreenGui")
+	self.Gui.Name = "ApexBoot"
+	self.Gui.ResetOnSpawn = false
+	self.Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	self.Gui.DisplayOrder = 99999
+	self.Gui.IgnoreGuiInset = true
+
+	local Ok = pcall(function()
+		self.Gui.Parent = CoreGui
+	end)
+	if not Ok then
+		self.Gui.Parent = game:GetService("Players").LocalPlayer:WaitForChild("PlayerGui")
+	end
+
 	self.Frame = Instance.new("Frame")
-	self.Frame.Name = "BootScreen"
+	self.Frame.Name = "BootFrame"
 	self.Frame.Size = UDim2.new(1, 0, 1, 0)
 	self.Frame.Position = UDim2.new(0, 0, 0, 0)
 	self.Frame.AnchorPoint = Vector2.new(0, 0)
 	self.Frame.BackgroundColor3 = Color3.fromHex("080809")
 	self.Frame.BorderSizePixel = 0
-	self.Frame.ZIndex = 99999
-	self.Frame.Parent = self.ScreenGui
+	self.Frame.ZIndex = 1
+	self.Frame.Parent = self.Gui
 
 	local ScanLine = Instance.new("Frame")
 	ScanLine.Name = "ScanLine"
@@ -42,36 +56,23 @@ function BootScreen:Build()
 	ScanLine.Position = UDim2.new(0, 0, 0, -80)
 	ScanLine.BorderSizePixel = 0
 	ScanLine.BackgroundColor3 = Color3.new(1, 1, 1)
-	ScanLine.ZIndex = 99999
+	ScanLine.ZIndex = 2
 	ScanLine.Parent = self.Frame
 
 	local ScanGradient = Instance.new("UIGradient")
 	ScanGradient.Transparency = NumberSequence.new({
 		NumberSequenceKeypoint.new(0, 1),
-		NumberSequenceKeypoint.new(0.5, 0.96),
+		NumberSequenceKeypoint.new(0.5, 0.95),
 		NumberSequenceKeypoint.new(1, 1),
 	})
 	ScanGradient.Rotation = 90
 	ScanGradient.Parent = ScanLine
 
-	local ScanConn = RunService.Heartbeat:Connect(function()
+	self.ScanConn = RunService.Heartbeat:Connect(function()
 		local MaxY = self.Frame.AbsoluteSize.Y
 		local Y = ScanLine.Position.Y.Offset
-		if Y > MaxY then
-			ScanLine.Position = UDim2.new(0, 0, 0, -80)
-		else
-			ScanLine.Position = UDim2.new(0, 0, 0, Y + 2)
-		end
+		ScanLine.Position = UDim2.new(0, 0, 0, Y > MaxY and -80 or Y + 2)
 	end)
-
-	local CRTOverlay = Instance.new("Frame")
-	CRTOverlay.Name = "CRTOverlay"
-	CRTOverlay.Size = UDim2.new(1, 0, 1, 0)
-	CRTOverlay.BackgroundColor3 = Color3.new(0, 0, 0)
-	CRTOverlay.BackgroundTransparency = 0.92
-	CRTOverlay.BorderSizePixel = 0
-	CRTOverlay.ZIndex = 99999
-	CRTOverlay.Parent = self.Frame
 
 	local Container = Instance.new("Frame")
 	Container.Name = "Container"
@@ -79,12 +80,12 @@ function BootScreen:Build()
 	Container.AutomaticSize = Enum.AutomaticSize.Y
 	Container.Position = UDim2.new(0.5, -160, 0.5, -100)
 	Container.BackgroundTransparency = 1
-	Container.ZIndex = 99999
+	Container.ZIndex = 3
 	Container.Parent = self.Frame
 
 	local Layout = Instance.new("UIListLayout")
 	Layout.FillDirection = Enum.FillDirection.Vertical
-	Layout.Padding = UDim.new(0, 5)
+	Layout.Padding = UDim.new(0, 6)
 	Layout.SortOrder = Enum.SortOrder.LayoutOrder
 	Layout.Parent = Container
 
@@ -92,7 +93,7 @@ function BootScreen:Build()
 	HeaderRow.Size = UDim2.new(1, 0, 0, 20)
 	HeaderRow.BackgroundTransparency = 1
 	HeaderRow.LayoutOrder = 1
-	HeaderRow.ZIndex = 99999
+	HeaderRow.ZIndex = 3
 	HeaderRow.Parent = Container
 
 	local HeaderLayout = Instance.new("UIListLayout")
@@ -108,7 +109,7 @@ function BootScreen:Build()
 	LogoLabel.TextColor3 = Color3.fromHex("d4d4e0")
 	LogoLabel.TextSize = 14
 	LogoLabel.Font = Enum.Font.GothamBold
-	LogoLabel.ZIndex = 99999
+	LogoLabel.ZIndex = 3
 	LogoLabel.Parent = HeaderRow
 
 	local HeaderLabel = Instance.new("TextLabel")
@@ -119,7 +120,7 @@ function BootScreen:Build()
 	HeaderLabel.TextSize = 11
 	HeaderLabel.Font = Enum.Font.GothamBold
 	HeaderLabel.TextXAlignment = Enum.TextXAlignment.Left
-	HeaderLabel.ZIndex = 99999
+	HeaderLabel.ZIndex = 3
 	HeaderLabel.Parent = HeaderRow
 
 	local ProgressBg = Instance.new("Frame")
@@ -127,7 +128,7 @@ function BootScreen:Build()
 	ProgressBg.BackgroundColor3 = Color3.fromHex("18181d")
 	ProgressBg.BorderSizePixel = 0
 	ProgressBg.LayoutOrder = 2
-	ProgressBg.ZIndex = 99999
+	ProgressBg.ZIndex = 3
 	ProgressBg.Parent = Container
 
 	local ProgressStroke = Instance.new("UIStroke")
@@ -139,7 +140,7 @@ function BootScreen:Build()
 	self.ProgressBar.Size = UDim2.new(0, 0, 1, 0)
 	self.ProgressBar.BackgroundColor3 = Color3.fromHex("d4d4e0")
 	self.ProgressBar.BorderSizePixel = 0
-	self.ProgressBar.ZIndex = 99999
+	self.ProgressBar.ZIndex = 4
 	self.ProgressBar.Parent = ProgressBg
 
 	local ProgressGlow = Instance.new("UIGradient")
@@ -161,7 +162,7 @@ function BootScreen:Build()
 	self.LinesContainer.AutomaticSize = Enum.AutomaticSize.Y
 	self.LinesContainer.BackgroundTransparency = 1
 	self.LinesContainer.LayoutOrder = 4
-	self.LinesContainer.ZIndex = 99999
+	self.LinesContainer.ZIndex = 3
 	self.LinesContainer.Parent = Container
 
 	local LinesLayout = Instance.new("UIListLayout")
@@ -169,9 +170,6 @@ function BootScreen:Build()
 	LinesLayout.Padding = UDim.new(0, 4)
 	LinesLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	LinesLayout.Parent = self.LinesContainer
-
-	self.Container  = Container
-	self.ScanConn   = ScanConn
 end
 
 function BootScreen:AddLine(Text, Index, Total)
@@ -181,7 +179,7 @@ function BootScreen:AddLine(Text, Index, Total)
 	Row.Size = UDim2.new(1, 0, 0, 12)
 	Row.BackgroundTransparency = 1
 	Row.LayoutOrder = Index
-	Row.ZIndex = 99999
+	Row.ZIndex = 3
 	Row.Parent = self.LinesContainer
 
 	local Arrow = Instance.new("TextLabel")
@@ -191,38 +189,30 @@ function BootScreen:AddLine(Text, Index, Total)
 	Arrow.TextColor3 = Color3.fromHex("272730")
 	Arrow.TextSize = 9
 	Arrow.Font = Enum.Font.GothamBold
-	Arrow.ZIndex = 99999
+	Arrow.ZIndex = 3
 	Arrow.Parent = Row
 
 	local Label = Instance.new("TextLabel")
 	Label.Size = UDim2.new(1, -16, 1, 0)
 	Label.Position = UDim2.new(0, 16, 0, 0)
 	Label.BackgroundTransparency = 1
-	Label.Text = Text
-	Label.TextColor3 = IsLast and Color3.fromHex("eeeef4") or Color3.fromHex("4a4a5a")
+	Label.Text = ""
+	Label.TextColor3 = IsLast and Color3.fromHex("eeeef4") or Color3.fromHex("6e6e82")
 	Label.TextSize = 9
 	Label.Font = Enum.Font.GothamBold
 	Label.TextXAlignment = Enum.TextXAlignment.Left
-	Label.TextTransparency = 1
-	Label.ZIndex = 99999
+	Label.ZIndex = 3
 	Label.Parent = Row
 
-	if not IsLast then
-		for I = 1, #Text do
-			task.delay(I * 0.018, function()
-				if Label and Label.Parent then
-					Label.Text = Text:sub(1, I)
-					Label.TextTransparency = 0
-				end
-			end)
-		end
-	else
-		TweenService:Create(Label, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-			TextTransparency = 0,
-		}):Play()
+	for I = 1, #Text do
+		task.delay(I * 0.016, function()
+			if Label and Label.Parent then
+				Label.Text = Text:sub(1, I)
+			end
+		end)
 	end
 
-	TweenService:Create(self.ProgressBar, TweenInfo.new(0.3, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+	TweenService:Create(self.ProgressBar, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
 		Size = UDim2.new(Index / Total, 0, 1, 0),
 	}):Play()
 end
@@ -233,13 +223,13 @@ function BootScreen:Play()
 
 	local function Next()
 		if Index >= Total then
-			task.wait(0.5)
+			task.wait(0.6)
 			self:Dismiss()
 			return
 		end
 		Index = Index + 1
 		self:AddLine(BootLines[Index], Index, Total)
-		task.delay(0.22 + math.random() * 0.14, Next)
+		task.delay(0.25 + math.random() * 0.15, Next)
 	end
 
 	task.delay(0.3, Next)
@@ -250,24 +240,24 @@ function BootScreen:Dismiss()
 		self.ScanConn:Disconnect()
 	end
 
-	TweenService:Create(self.Frame, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+	TweenService:Create(self.Frame, TweenInfo.new(0.7, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
 		BackgroundTransparency = 1,
 	}):Play()
 
 	for _, Child in ipairs(self.Frame:GetDescendants()) do
 		if Child:IsA("TextLabel") then
-			TweenService:Create(Child, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+			TweenService:Create(Child, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 				TextTransparency = 1,
 			}):Play()
-		elseif Child:IsA("Frame") then
-			TweenService:Create(Child, TweenInfo.new(0.35, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+		elseif Child:IsA("Frame") and Child ~= self.Frame then
+			TweenService:Create(Child, TweenInfo.new(0.4, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 				BackgroundTransparency = 1,
 			}):Play()
 		end
 	end
 
-	task.delay(0.65, function()
-		self.Frame:Destroy()
+	task.delay(0.75, function()
+		self.Gui:Destroy()
 		self.OnDone()
 	end)
 end
