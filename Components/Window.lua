@@ -89,14 +89,16 @@ function Window:Build()
 	Shadow.Parent = self.Root
 
 	self.Topbar = TopbarModule.New({
-		Parent    = self.Root,
-		Title     = self.Title,
-		SubTitle  = self.SubTitle,
-		Theme     = T,
-		Window    = self,
-		Animate   = self.AnimateModule,
-		Util      = self.UtilModule,
-	})
+	Parent    = self.Root,
+	Title     = self.Title,
+	SubTitle  = self.SubTitle,
+	Theme     = T,
+	Window    = self,
+	Animate   = self.AnimateModule,
+	Util      = self.UtilModule,
+	ScreenGui = self.ScreenGui,
+})
+
 
 	self.NavBar = Instance.new("Frame")
 	self.NavBar.Name = "NavBar"
