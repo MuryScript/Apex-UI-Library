@@ -1,7 +1,6 @@
 local BootScreen = {}
 BootScreen.__index = BootScreen
 
-local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 
 local BootLines = {
@@ -45,7 +44,7 @@ function BootScreen:Build()
 
 	local Layout = Instance.new("UIListLayout")
 	Layout.FillDirection = Enum.FillDirection.Vertical
-	Layout.Padding = UDim.new(0, 3)
+	Layout.Padding = UDim.new(0, 4)
 	Layout.SortOrder = Enum.SortOrder.LayoutOrder
 	Layout.Parent = Container
 
@@ -61,28 +60,28 @@ function BootScreen:Build()
 	Header.ZIndex = 9999
 	Header.Parent = Container
 
-	local ProgressContainer = Instance.new("Frame")
-	ProgressContainer.Size = UDim2.new(1, 0, 0, 3)
-	ProgressContainer.BackgroundColor3 = Color3.fromHex("18181d")
-	ProgressContainer.BorderSizePixel = 0
-	ProgressContainer.LayoutOrder = 2
-	ProgressContainer.ZIndex = 9999
-	ProgressContainer.Parent = Container
+	local ProgressBg = Instance.new("Frame")
+	ProgressBg.Size = UDim2.new(1, 0, 0, 3)
+	ProgressBg.BackgroundColor3 = Color3.fromHex("18181d")
+	ProgressBg.BorderSizePixel = 0
+	ProgressBg.LayoutOrder = 2
+	ProgressBg.ZIndex = 9999
+	ProgressBg.Parent = Container
 
 	local ProgressStroke = Instance.new("UIStroke")
 	ProgressStroke.Color = Color3.fromHex("32323e")
 	ProgressStroke.Thickness = 1
-	ProgressStroke.Parent = ProgressContainer
+	ProgressStroke.Parent = ProgressBg
 
 	self.ProgressBar = Instance.new("Frame")
 	self.ProgressBar.Size = UDim2.new(0, 0, 1, 0)
 	self.ProgressBar.BackgroundColor3 = Color3.fromHex("d4d4e0")
 	self.ProgressBar.BorderSizePixel = 0
 	self.ProgressBar.ZIndex = 9999
-	self.ProgressBar.Parent = ProgressContainer
+	self.ProgressBar.Parent = ProgressBg
 
 	local Spacer = Instance.new("Frame")
-	Spacer.Size = UDim2.new(1, 0, 0, 6)
+	Spacer.Size = UDim2.new(1, 0, 0, 4)
 	Spacer.BackgroundTransparency = 1
 	Spacer.LayoutOrder = 3
 	Spacer.Parent = Container
@@ -134,17 +133,16 @@ function BootScreen:AddLine(Text, Index, Total)
 	Label.TextSize = 9
 	Label.Font = Enum.Font.GothamBold
 	Label.TextXAlignment = Enum.TextXAlignment.Left
+	Label.TextTransparency = 1
 	Label.ZIndex = 9999
 	Label.Parent = Row
 
-	Label.TextTransparency = 1
 	TweenService:Create(Label, TweenInfo.new(0.15, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
 		TextTransparency = 0,
 	}):Play()
 
-	local Pct = Index / Total
 	TweenService:Create(self.ProgressBar, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-		Size = UDim2.new(Pct, 0, 1, 0),
+		Size = UDim2.new(Index / Total, 0, 1, 0),
 	}):Play()
 end
 
@@ -154,7 +152,7 @@ function BootScreen:Play()
 
 	local function Next()
 		if Index >= Total then
-			task.wait(0.3)
+			task.wait(0.4)
 			self:Dismiss()
 			return
 		end
@@ -179,7 +177,7 @@ function BootScreen:Dismiss()
 		end
 	end
 
-	task.delay(0.5, function()
+	task.delay(0.55, function()
 		self.Frame:Destroy()
 		self.OnDone()
 	end)
