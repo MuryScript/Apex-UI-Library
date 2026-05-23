@@ -57,11 +57,13 @@ function Window:Build()
 
 	self.Root = Instance.new("Frame")
 	self.Root.Name = "ApexWindow"
-	self.Root.Size = UDim2.new(0, 0, 0, 0)
+	self.Root.Size = UDim2.new(0, self.Size.X.Offset, 0, 0)
 	self.Root.Position = self.Position
 	self.Root.BackgroundColor3 = T.Deep
+	self.Root.BackgroundTransparency = 1
 	self.Root.BorderSizePixel = 0
 	self.Root.ClipsDescendants = true
+	self.Root.Visible = false
 	self.Root.Parent = self.ScreenGui
 
 	local Corner = Instance.new("UICorner")
@@ -158,16 +160,15 @@ function Window:Build()
 	self.ContentArea.ClipsDescendants = true
 	self.ContentArea.Parent = self.Root
 
-	self:OpenAnimation()
 	self.UtilModule:MakeDraggable(self.Root, self.Topbar.Frame)
 end
 
 function Window:OpenAnimation()
-	self.Root.BackgroundTransparency = 1
+	self.Root.Visible = true
 	self.Root.Size = UDim2.new(0, self.Size.X.Offset, 0, 0)
+	self.Root.BackgroundTransparency = 1
 
 	TweenService:Create(self.Root, TweenInfo.new(0.12, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
-		Size = UDim2.new(0, self.Size.X.Offset, 0, 0),
 		BackgroundTransparency = 0,
 	}):Play()
 
@@ -276,8 +277,8 @@ function Window:Toggle()
 end
 
 function Window:Show()
-	self.Root.Visible = true
 	self.Visible = true
+	self.Root.Visible = true
 	self.Root.Size = UDim2.new(0, self.Size.X.Offset, 0, 0)
 	self.Root.BackgroundTransparency = 1
 	TweenService:Create(self.Root, TweenInfo.new(0.1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
@@ -293,7 +294,7 @@ end
 function Window:Hide()
 	self.Visible = false
 	TweenService:Create(self.Root, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
-		Size = UDim2.new(0, self.Size.X.Offset, 0, 0),
+		Size                  = UDim2.new(0, self.Size.X.Offset, 0, 0),
 		BackgroundTransparency = 1,
 	}):Play()
 	task.delay(0.25, function()
