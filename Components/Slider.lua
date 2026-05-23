@@ -7,8 +7,12 @@ function Slider.New(Options)
 	local self = setmetatable({}, Slider)
 
 	self.Name          = Options.Name or "Slider"
-	self.Min           = Options.Min or 0
-	self.Max           = Options.Max or 100
+	self.Min = Options.Min or 0
+    self.Max = Options.Max or 100
+    if self.Max <= self.Min then
+	  self.Max = self.Min + 1
+    end
+
 	self.Increment     = Options.Increment or 1
 	self.Unit          = Options.Unit or ""
 	self.Flag          = Options.Flag or nil
