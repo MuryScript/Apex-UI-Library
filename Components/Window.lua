@@ -58,7 +58,7 @@ function Window:Build()
 	self.Root = Instance.new("Frame")
 	self.Root.Name = "ApexWindow"
 	self.Root.Size = UDim2.new(0, self.Size.X.Offset, 0, 0)
-	self.Root.Position = self.Position
+	self.Root.Position = UDim2.new(0.5, -self.Size.X.Offset / 2, 0.5, -self.Size.Y.Offset / 2)
 	self.Root.BackgroundColor3 = T.Deep
 	self.Root.BackgroundTransparency = 1
 	self.Root.BorderSizePixel = 0
