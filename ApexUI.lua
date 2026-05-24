@@ -88,10 +88,12 @@ function ApexUI:Init(Options)
 
    local BootModule = LoadedModules["Layout/BootScreen.lua"]
    BootModule.New({
-   	ScreenGui = ScreenGui,
+      Window = Windows[1] or nil,
+   	Title = "APEX UI",
+      SubTitle = "SYSTEM BOOT",
    	OnDone    = function()
    		for _, W in ipairs(Windows) do
-   			W:OpenAnimation()
+   			W.Root.Position = UDim2.new(0.5, -W.Size.X.Offset / 2, 0.5, -W.Size.Y.OffSet / 2)
    		end
    	end,
    })
