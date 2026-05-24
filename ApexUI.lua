@@ -93,7 +93,7 @@ function ApexUI:Init(Options)
       SubTitle = "SYSTEM BOOT",
    	OnDone    = function()
    		for _, W in ipairs(Windows) do
-   			W.Root.Position = UDim2.new(0.5, -W.Size.X.Offset / 2, 0.5, -W.Size.Y.OffSet / 2)
+   			W.Root.Position = UDim2.new(0.5, -W.Size.X.Offset / 2, 0.5, -W.Size.Y.Offset / 2)
    		end
    	end,
    })
