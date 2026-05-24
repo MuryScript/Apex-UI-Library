@@ -1,6 +1,6 @@
 # Apex UI Library
 
-A modern, high-performance UI library built for Roblox executors. Designed with a focus on clean aesthetics, smooth animations, and a dead-simple API — so you spend less time building interfaces and more time building features.
+A modern, high-performance UI library built for Roblox executors. Designed with a focus on clean aesthetics, smooth animations, and a dead-simple API.
 
 ---
 
@@ -81,34 +81,43 @@ API Reference
 
 ApexUI
 
-ApexUI:Init(Options)
-
-Initializes the library. Must be called before anything else.
 
 
+|Method                         |Description                                  |
+|-------------------------------|---------------------------------------------|
+|`ApexUI:Init(Options)`         |Initializes the library. Must be called first|
+|`ApexUI:CreateWindow(Options)` |Creates and returns a Window                 |
+|`ApexUI:Notify(Options)`       |Sends a toast notification                   |
+|`ApexUI:SetTheme(Name)`        |Switches active theme and updates all windows|
+|`ApexUI:GetTheme()`            |Returns active theme name                    |
+|`ApexUI:GetThemes()`           |Returns table of all theme names             |
+|`ApexUI:SaveConfig()`          |Saves all flagged values to disk             |
+|`ApexUI:LoadConfig()`          |Loads config from disk                       |
+|`ApexUI:RegisterPlugin(Plugin)`|Registers a plugin                           |
+|`ApexUI:Destroy()`             |Destroys all windows and cleans up           |
 
-|Option   |Type  |Default     |Description                  |
-|---------|------|------------|-----------------------------|
-|Theme    |string|“Monochrome”|Starting theme               |
-|ConfigKey|string|nil         |Key used for config file name|
-
-ApexUI:CreateWindow(Options)
-
-Creates and returns a Window.
+Init Options
 
 
 
-|Option     |Type   |Default   |Description                 |
-|-----------|-------|----------|----------------------------|
-|Title      |string |“ApexUI”  |Window title                |
-|SubTitle   |string |“v1.0.0”  |Subtitle shown next to title|
-|Size       |UDim2  |520x440   |Window size                 |
-|Position   |UDim2  |center    |Window position             |
-|MinimizeKey|KeyCode|RightShift|Key to toggle window        |
+|Option   |Type  |Default     |Description         |
+|---------|------|------------|--------------------|
+|Theme    |string|“Monochrome”|Starting theme      |
+|ConfigKey|string|nil         |Config file name key|
 
-ApexUI:Notify(Options)
+CreateWindow Options
 
-Sends a toast notification.
+
+
+|Option     |Type   |Default   |Description           |
+|-----------|-------|----------|----------------------|
+|Title      |string |“ApexUI”  |Window title          |
+|SubTitle   |string |“v1.0.0”  |Subtitle next to title|
+|Size       |UDim2  |520x440   |Window size           |
+|Position   |UDim2  |center    |Window position       |
+|MinimizeKey|KeyCode|RightShift|Key to toggle window  |
+
+Notify Options
 
 
 
@@ -119,169 +128,194 @@ Sends a toast notification.
 |Type    |string|“Info”        |Info, Success, Warning, Error|
 |Duration|number|4             |Seconds before dismissing    |
 
-ApexUI:SetTheme(Name)
-
-Switches the active theme and updates all windows.
-
-ApexUI:GetTheme()
-
-Returns the name of the active theme.
-
-ApexUI:GetThemes()
-
-Returns a table of all available theme names.
-
-ApexUI:SaveConfig()
-
-Saves all flagged values to disk. Returns true on success.
-
-ApexUI:LoadConfig()
-
-Loads config from disk and fires all flag callbacks. Returns true on success.
-
-ApexUI:RegisterPlugin(Plugin)
-
-Registers a plugin table with lifecycle hooks.
-
-ApexUI:Destroy()
-
-Destroys all windows and cleans up the ScreenGui.
-
 Window
 
-Window:AddTab(Options)
 
-Adds a tab to the window navbar and returns it.
+
+|Method                         |Description                         |
+|-------------------------------|------------------------------------|
+|`Window:AddTab(Options)`       |Adds a tab and returns it           |
+|`Window:Show()`                |Shows window with animation         |
+|`Window:Hide()`                |Hides window with animation         |
+|`Window:Toggle()`              |Toggles visibility                  |
+|`Window:ApplyTheme(ThemeTable)`|Applies theme to window and children|
+|`Window:Destroy()`             |Destroys the window                 |
+
+AddTab Options
 
 
 
 |Option|Type  |Description                   |
 |------|------|------------------------------|
-|Name  |string|Tab name shown on hover       |
+|Name  |string|Tab label                     |
 |Icon  |string|Icon character shown in navbar|
-
-Window:Show()
-
-Shows the window with open animation.
-
-Window:Hide()
-
-Hides the window with close animation.
-
-Window:Toggle()
-
-Toggles window visibility.
-
-Window:ApplyTheme(ThemeTable)
-
-Applies a theme table to the window and all children.
-
-Window:Destroy()
-
-Destroys the window and disconnects all connections.
 
 Tab
 
-Tab:AddSection(Options)
-
-Adds a section to the tab and returns it.
 
 
+|Method                   |Description                  |
+|-------------------------|-----------------------------|
+|`Tab:AddSection(Options)`|Adds a section and returns it|
 
-|Option|Type  |Description                       |
-|------|------|----------------------------------|
-|Name  |string|Section header label              |
-|Tag   |string|Optional tag shown at bottom right|
+AddSection Options
+
+|Option|Type  |Description              |
+|------|------|-------------------------|
+|Name  |string|Section header label     |
+|Tag   |string|Optional bottom-right tag|
 
 Section
 
-Section:AddToggle(Options)
+AddToggle
+
+Section:AddToggle({
+    Name     = "God Mode",
+    Sub      = "disable damage intake",
+    Default  = false,
+    Flag     = "GodMode",
+    Callback = function(Value) end,
+})
 
 
 
-|Option  |Type    |Default |Description          |
-|--------|--------|--------|---------------------|
-|Name    |string  |“Toggle”|Label                |
-|Sub     |string  |nil     |Subtitle below label |
-|Default |boolean |false   |Starting value       |
-|Flag    |string  |nil     |Config key           |
-|Callback|function|nil     |Called with new value|
 
-Section:AddSlider(Options)
+|Option  |Type    |Default |Description       |
+|--------|--------|--------|------------------|
+|Name    |string  |“Toggle”|Label             |
+|Sub     |string  |nil     |Subtitle          |
+|Default |boolean |false   |Starting value    |
+|Flag    |string  |nil     |Config key        |
+|Callback|function|nil     |fn(Value: boolean)|
 
+AddSlider
 
-
-|Option   |Type    |Default |Description                |
-|---------|--------|--------|---------------------------|
-|Name     |string  |“Slider”|Label                      |
-|Min      |number  |0       |Minimum value              |
-|Max      |number  |100     |Maximum value              |
-|Default  |number  |Min     |Starting value             |
-|Increment|number  |1       |Step size                  |
-|Unit     |string  |“”      |Unit suffix e.g. “°” or “%”|
-|Flag     |string  |nil     |Config key                 |
-|Callback |function|nil     |Called with new value      |
-
-Section:AddDropdown(Options)
+Section:AddSlider({
+    Name      = "Speed",
+    Min       = 0,
+    Max       = 100,
+    Default   = 50,
+    Increment = 1,
+    Unit      = "%",
+    Flag      = "WalkSpeed",
+    Callback  = function(Value) end,
+})
 
 
+|Option   |Type    |Default |Description           |
+|---------|--------|--------|----------------------|
+|Name     |string  |“Slider”|Label                 |
+|Min      |number  |0       |Minimum               |
+|Max      |number  |100     |Maximum               |
+|Default  |number  |Min     |Starting value        |
+|Increment|number  |1       |Step size             |
+|Unit     |string  |“”      |Suffix e.g. “°” or “%”|
+|Flag     |string  |nil     |Config key            |
+|Callback |function|nil     |fn(Value: number)     |
 
-|Option  |Type        |Default   |Description                  |
-|--------|------------|----------|-----------------------------|
-|Name    |string      |“Dropdown”|Label                        |
-|Options |table       |{}        |List of options              |
-|Default |string/table|Options[1]|Starting value               |
-|Multi   |boolean     |false     |Allow multiple selections    |
-|Flag    |string      |nil       |Config key                   |
-|Callback|function    |nil       |Called with selected value(s)|
+AddDropdown
 
-Section:AddKeybind(Options)
+Section:AddDropdown({
+    Name     = "Target Bone",
+    Options  = { "Head", "Torso", "Root" },
+    Default  = "Head",
+    Multi    = false,
+    Flag     = "AimbotBone",
+    Callback = function(Value) end,
+})
+
+
+|Option  |Type    |Default   |Description               |
+|--------|--------|----------|--------------------------|
+|Name    |string  |“Dropdown”|Label                     |
+|Options |table   |{}        |List of options           |
+|Default |any     |Options[1]|Starting value            |
+|Multi   |boolean |false     |Multi-select mode         |
+|Flag    |string  |nil       |Config key                |
+|Callback|function|nil       |fn(Value: string or table)|
+
+AddKeybind
+
+Section:AddKeybind({
+    Name     = "Toggle Aimbot",
+    Default  = Enum.KeyCode.E,
+    Flag     = "AimbotKey",
+    Callback = function(Key) end,
+})
 
 
 
-|Option  |Type    |Default  |Description            |
-|--------|--------|---------|-----------------------|
-|Name    |string  |“Keybind”|Label                  |
-|Default |KeyCode |KeyCode.F|Starting key           |
-|Flag    |string  |nil      |Config key             |
-|Callback|function|nil      |Called with new KeyCode|
 
-Section:AddButton(Options)
+|Option  |Type    |Default  |Description     |
+|--------|--------|---------|----------------|
+|Name    |string  |“Keybind”|Label           |
+|Default |KeyCode |KeyCode.F|Starting key    |
+|Flag    |string  |nil      |Config key      |
+|Callback|function|nil      |fn(Key: KeyCode)|
+
+AddButton
+
+Section:AddButton({
+    Name     = "Execute",
+    Sub      = "runs the action",
+    Variant  = "Ok",
+    Callback = function() end,
+})
+
 
 
 
 |Option  |Type    |Default  |Description                   |
 |--------|--------|---------|------------------------------|
 |Name    |string  |“Button” |Label                         |
-|Sub     |string  |nil      |Subtitle below label          |
+|Sub     |string  |nil      |Subtitle                      |
 |Variant |string  |“Default”|Default, Ok, Warn, Err, Accent|
-|Callback|function|nil      |Called on click               |
+|Callback|function|nil      |fn()                          |
 
-Section:AddTextInput(Options)
+AddTextInput
 
-
-
-|Option     |Type    |Default      |Description                           |
-|-----------|--------|-------------|--------------------------------------|
-|Name       |string  |“TextInput”  |Label                                 |
-|Placeholder|string  |“Enter text…”|Placeholder text                      |
-|Default    |string  |“”           |Starting value                        |
-|Flag       |string  |nil          |Config key                            |
-|Callback   |function|nil          |Called with new value and EnterPressed|
-
-Section:AddColorPicker(Options)
+Section:AddTextInput({
+    Name        = "Player Name",
+    Placeholder = "Enter name...",
+    Default     = "",
+    Flag        = "TargetName",
+    Callback    = function(Value, EnterPressed) end,
+})
 
 
+|Option     |Type    |Default      |Description                             |
+|-----------|--------|-------------|----------------------------------------|
+|Name       |string  |“TextInput”  |Label                                   |
+|Placeholder|string  |“Enter text…”|Placeholder                             |
+|Default    |string  |“”           |Starting value                          |
+|Flag       |string  |nil          |Config key                              |
+|Callback   |function|nil          |fn(Value: string, EnterPressed: boolean)|
 
-|Option  |Type    |Default      |Description           |
-|--------|--------|-------------|----------------------|
-|Name    |string  |“ColorPicker”|Label                 |
-|Default |Color3  |white        |Starting color        |
-|Flag    |string  |nil          |Config key            |
-|Callback|function|nil          |Called with new Color3|
+AddColorPicker
 
-Section:AddLabel(Options)
+Section:AddColorPicker({
+    Name     = "ESP Color",
+    Default  = Color3.fromRGB(255, 0, 0),
+    Flag     = "EspColor",
+    Callback = function(Color) end,
+})
 
+
+
+
+|Option  |Type    |Default      |Description      |
+|--------|--------|-------------|-----------------|
+|Name    |string  |“ColorPicker”|Label            |
+|Default |Color3  |white        |Starting color   |
+|Flag    |string  |nil          |Config key       |
+|Callback|function|nil          |fn(Color: Color3)|
+
+AddLabel
+
+Section:AddLabel({
+    Text  = "Some info text.",
+    Color = Color3.fromHex("6effc0"),
+})
 
 
 |Option|Type  |Description        |
@@ -289,30 +323,25 @@ Section:AddLabel(Options)
 |Text  |string|Label text         |
 |Color |Color3|Optional text color|
 
+AddSeparator
+
 Section:AddSeparator()
 
-Adds a horizontal gradient divider.
 
 Themes
 
-Five built-in themes available out of the box:
 
 
-
-|Name      |Description              |
-|----------|-------------------------|
-|Monochrome|Default dark grey palette|
-|Crimson   |Deep red accents         |
-|Neon      |Electric purple/blue     |
-|Slate     |Cool blue-grey           |
-|Void      |Pure black minimal       |
+|Name      |Description                |
+|----------|---------------------------|
+|Monochrome|Dark grey palette (default)|
+|Crimson   |Deep red accents           |
+|Neon      |Electric purple/blue       |
+|Slate     |Cool blue-grey             |
+|Void      |Pure black minimal         |
 
 Custom Themes
 
-ApexUI:Init({ Theme = "Monochrome" })
-
--- After init, register via ThemeModule directly or use a plugin
-local ThemeModule = -- your reference
 ThemeModule:Register("Toxic", {
     Void   = Color3.fromHex("060a06"),
     Deep   = Color3.fromHex("0a100a"),
@@ -334,21 +363,18 @@ ThemeModule:Register("Toxic", {
 
 Config System
 
-Flags automatically save and load values per element. Just set a Flag on any element and call ApexUI:SaveConfig() / ApexUI:LoadConfig().
+Set a Flag on any element to enable auto save/load.
 
 Section:AddToggle({
-    Name    = "God Mode",
-    Flag    = "GodMode",
-    Default = false,
+    Name     = "God Mode",
+    Flag     = "GodMode",
+    Default  = false,
     Callback = function(Value)
         -- fires on load too
     end,
 })
 
--- Save
 ApexUI:SaveConfig()
-
--- Load
 ApexUI:LoadConfig()
 
 
@@ -356,17 +382,15 @@ Config is saved as a JSON file named after your ConfigKey.
 
 Plugin System
 
-Plugins hook into the library lifecycle via named events.
-
 ApexUI:RegisterPlugin({
     Name = "MyPlugin",
 
     OnInit = function(Apex)
-        print("Library initialized")
+        print("Initialized")
     end,
 
     OnWindowCreated = function(Window)
-        print("Window created:", Window.Title)
+        print("Window:", Window.Title)
     end,
 
     OnThemeChanged = function(Theme)
@@ -374,15 +398,15 @@ ApexUI:RegisterPlugin({
     end,
 
     OnConfigSaved = function()
-        print("Config saved")
+        print("Saved")
     end,
 
     OnConfigLoaded = function()
-        print("Config loaded")
+        print("Loaded")
     end,
 
     OnDestroy = function()
-        print("Library destroyed")
+        print("Destroyed")
     end,
 })
 
@@ -391,17 +415,17 @@ Available Hooks
 
 
 
-|Hook            |Arguments |Description                      |
-|----------------|----------|---------------------------------|
-|OnInit          |Apex      |Fires after library initializes  |
-|OnWindowCreated |Window    |Fires when a window is created   |
-|OnTabCreated    |Tab       |Fires when a tab is created      |
-|OnSectionCreated|Section   |Fires when a section is created  |
-|OnElementCreated|Element   |Fires when any element is created|
-|OnThemeChanged  |ThemeTable|Fires when theme is changed      |
-|OnConfigSaved   |none      |Fires after config is saved      |
-|OnConfigLoaded  |none      |Fires after config is loaded     |
-|OnDestroy       |none      |Fires before library is destroyed|
+|Hook            |Arguments |Description                |
+|----------------|----------|---------------------------|
+|OnInit          |Apex      |After library initializes  |
+|OnWindowCreated |Window    |When a window is created   |
+|OnTabCreated    |Tab       |When a tab is created      |
+|OnSectionCreated|Section   |When a section is created  |
+|OnElementCreated|Element   |When any element is created|
+|OnThemeChanged  |ThemeTable|When theme changes         |
+|OnConfigSaved   |none      |After config saves         |
+|OnConfigLoaded  |none      |After config loads         |
+|OnDestroy       |none      |Before library destroys    |
 
 File Structure
 
@@ -438,7 +462,5 @@ ApexUI/
 License
 
 MIT License — free to use, modify, and distribute.
-
-Credits
 
 Built by MuryScript.
