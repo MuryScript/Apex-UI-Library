@@ -62,14 +62,10 @@ function Dropdown:GetDisplayText()
 			table.insert(Selected, tostring(Option))
 		end
 	end
-	if #Selected == 0 then
-		return "None"
-	elseif #Selected == #self.Options then
-		return "All"
-	elseif #Selected <= 2 then
-		return table.concat(Selected, ", ")
-	else
-		return Selected[1] .. ", +" .. (#Selected - 1)
+	if #Selected == 0 then return "None"
+	elseif #Selected == #self.Options then return "All"
+	elseif #Selected <= 2 then return table.concat(Selected, ", ")
+	else return Selected[1] .. ", +" .. (#Selected - 1)
 	end
 end
 
@@ -86,10 +82,10 @@ function Dropdown:Build(Parent)
 	self.Frame.Parent = Parent
 
 	local Padding = Instance.new("UIPadding")
-	Padding.PaddingTop = UDim.new(0, 6)
+	Padding.PaddingTop    = UDim.new(0, 6)
 	Padding.PaddingBottom = UDim.new(0, 6)
-	Padding.PaddingLeft = UDim.new(0, 2)
-	Padding.PaddingRight = UDim.new(0, 2)
+	Padding.PaddingLeft   = UDim.new(0, 2)
+	Padding.PaddingRight  = UDim.new(0, 2)
 	Padding.Parent = self.Frame
 
 	local HeaderRow = Instance.new("Frame")
@@ -99,7 +95,6 @@ function Dropdown:Build(Parent)
 	HeaderRow.Parent = self.Frame
 
 	self.NameLabel = Instance.new("TextLabel")
-	self.NameLabel.Name = "NameLabel"
 	self.NameLabel.Size = UDim2.new(1, 0, 1, 0)
 	self.NameLabel.BackgroundTransparency = 1
 	self.NameLabel.Text = self.Name:upper()
@@ -111,7 +106,6 @@ function Dropdown:Build(Parent)
 
 	if self.Multi then
 		local MultiTag = Instance.new("TextLabel")
-		MultiTag.Name = "MultiTag"
 		MultiTag.Size = UDim2.new(0, 40, 1, 0)
 		MultiTag.Position = UDim2.new(1, -40, 0, 0)
 		MultiTag.BackgroundTransparency = 1
@@ -142,7 +136,6 @@ function Dropdown:Build(Parent)
 	self.SelectStroke.Parent = self.SelectButton
 
 	self.SelectedLabel = Instance.new("TextLabel")
-	self.SelectedLabel.Name = "SelectedLabel"
 	self.SelectedLabel.Size = UDim2.new(1, -28, 1, 0)
 	self.SelectedLabel.Position = UDim2.new(0, 10, 0, 0)
 	self.SelectedLabel.BackgroundTransparency = 1
@@ -155,7 +148,6 @@ function Dropdown:Build(Parent)
 	self.SelectedLabel.Parent = self.SelectButton
 
 	self.ArrowLabel = Instance.new("TextLabel")
-	self.ArrowLabel.Name = "Arrow"
 	self.ArrowLabel.Size = UDim2.new(0, 20, 1, 0)
 	self.ArrowLabel.Position = UDim2.new(1, -22, 0, 0)
 	self.ArrowLabel.BackgroundTransparency = 1
@@ -190,6 +182,44 @@ function Dropdown:Build(Parent)
 	ListLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	ListLayout.Parent = self.OptionsList
 
+	self:BuildOptions()
+
+	self.ListHeight = #self.Options * 28
+
+	local ToggleConn = self.SelectButton.MouseButton1Click:Connect(function()
+		if self.Open then
+			self:CloseList()
+		else
+			self:OpenList()
+		end
+	end)
+
+	local OutsideConn = UserInputService.InputBegan:Connect(function(Input)
+		if not self.Open then return end
+		if Input.UserInputType ~= Enum.UserInputType.MouseButton1
+			and Input.UserInputType ~= Enum.UserInputType.Touch then return end
+		local Pos  = self.OptionsList.AbsolutePosition
+		local Size = self.OptionsList.AbsoluteSize
+		local IPos = Input.Position
+		if IPos.X < Pos.X or IPos.X > Pos.X + Size.X
+			or IPos.Y < Pos.Y or IPos.Y > Pos.Y + Size.Y then
+			self:CloseList()
+		end
+	end)
+
+	table.insert(self.Connections, ToggleConn)
+	table.insert(self.Connections, OutsideConn)
+end
+
+function Dropdown:BuildOptions()
+	local T = self.Theme
+
+	for _, Child in ipairs(self.OptionsList:GetChildren()) do
+		if Child:IsA("TextButton") then
+			Child:Destroy()
+		end
+	end
+
 	self.OptionButtons = {}
 
 	for Index, Option in ipairs(self.Options) do
@@ -208,7 +238,6 @@ function Dropdown:Build(Parent)
 		OptionButton.Parent = self.OptionsList
 
 		local ActiveBar = Instance.new("Frame")
-		ActiveBar.Name = "ActiveBar"
 		ActiveBar.Size = UDim2.new(0, 2, 1, 0)
 		ActiveBar.BackgroundColor3 = T.Accent
 		ActiveBar.BorderSizePixel = 0
@@ -217,7 +246,6 @@ function Dropdown:Build(Parent)
 		ActiveBar.Parent = OptionButton
 
 		local OptionLabel = Instance.new("TextLabel")
-		OptionLabel.Name = "Label"
 		OptionLabel.Size = UDim2.new(1, -36, 1, 0)
 		OptionLabel.Position = UDim2.new(0, 12, 0, 0)
 		OptionLabel.BackgroundTransparency = 1
@@ -229,9 +257,15 @@ function Dropdown:Build(Parent)
 		OptionLabel.ZIndex = 12
 		OptionLabel.Parent = OptionButton
 
+		local Entry = {
+			Button = OptionButton,
+			Label  = OptionLabel,
+			Bar    = ActiveBar,
+			Value  = Option,
+		}
+
 		if self.Multi then
 			local CheckBox = Instance.new("Frame")
-			CheckBox.Name = "CheckBox"
 			CheckBox.Size = UDim2.new(0, 10, 0, 10)
 			CheckBox.Position = UDim2.new(1, -18, 0.5, -5)
 			CheckBox.BackgroundColor3 = IsSelected and T.Accent or T.Lift
@@ -259,25 +293,14 @@ function Dropdown:Build(Parent)
 			CheckMark.ZIndex = 13
 			CheckMark.Parent = CheckBox
 
-			table.insert(self.OptionButtons, {
-				Button    = OptionButton,
-				Label     = OptionLabel,
-				Bar       = ActiveBar,
-				CheckBox  = CheckBox,
-				CheckStroke = CheckStroke,
-				CheckMark = CheckMark,
-				Value     = Option,
-			})
-		else
-			table.insert(self.OptionButtons, {
-				Button = OptionButton,
-				Label  = OptionLabel,
-				Bar    = ActiveBar,
-				Value  = Option,
-			})
+			Entry.CheckBox    = CheckBox
+			Entry.CheckStroke = CheckStroke
+			Entry.CheckMark   = CheckMark
 		end
 
-		local ClickConn = OptionButton.MouseButton1Click:Connect(function()
+		table.insert(self.OptionButtons, Entry)
+
+		OptionButton.MouseButton1Click:Connect(function()
 			if self.Multi then
 				self:ToggleOption(Option)
 			else
@@ -286,7 +309,7 @@ function Dropdown:Build(Parent)
 			end
 		end)
 
-		local EnterConn = OptionButton.MouseEnter:Connect(function()
+		OptionButton.MouseEnter:Connect(function()
 			local Sel = self.Multi and self.Value[Option] or (not self.Multi and self.Value == Option)
 			if not Sel then
 				self.AnimateModule:Tween(OptionLabel, { TextColor3 = T.Bright }, "Snappy")
@@ -294,46 +317,14 @@ function Dropdown:Build(Parent)
 			end
 		end)
 
-		local LeaveConn = OptionButton.MouseLeave:Connect(function()
+		OptionButton.MouseLeave:Connect(function()
 			local Sel = self.Multi and self.Value[Option] or (not self.Multi and self.Value == Option)
 			if not Sel then
 				self.AnimateModule:Tween(OptionLabel, { TextColor3 = T.Muted }, "Snappy")
 				self.AnimateModule:Tween(OptionButton, { BackgroundTransparency = 1 }, "Snappy")
 			end
 		end)
-
-		table.insert(self.Connections, ClickConn)
-		table.insert(self.Connections, EnterConn)
-		table.insert(self.Connections, LeaveConn)
 	end
-
-	self.ListHeight = #self.Options * 28
-
-	local ToggleConn = self.SelectButton.MouseButton1Click:Connect(function()
-		if self.Open then
-			self:CloseList()
-		else
-			self:OpenList()
-		end
-	end)
-
-	local OutsideConn = UserInputService.InputBegan:Connect(function(Input)
-		if Input.UserInputType == Enum.UserInputType.MouseButton1
-			or Input.UserInputType == Enum.UserInputType.Touch then
-			if self.Open then
-				local Pos = self.OptionsList.AbsolutePosition
-				local Size = self.OptionsList.AbsoluteSize
-				local IPos = Input.Position
-				if IPos.X < Pos.X or IPos.X > Pos.X + Size.X
-					or IPos.Y < Pos.Y or IPos.Y > Pos.Y + Size.Y then
-					self:CloseList()
-				end
-			end
-		end
-	end)
-
-	table.insert(self.Connections, ToggleConn)
-	table.insert(self.Connections, OutsideConn)
 end
 
 function Dropdown:OpenList()
@@ -362,25 +353,21 @@ end
 function Dropdown:ToggleOption(Option)
 	local T = self.Theme
 	self.Value[Option] = not self.Value[Option]
-
 	for _, Entry in ipairs(self.OptionButtons) do
 		if Entry.Value == Option then
 			local IsSelected = self.Value[Option]
-			self.AnimateModule:Tween(Entry.Label, { TextColor3 = IsSelected and T.White or T.Muted }, "Snappy")
-			self.AnimateModule:Tween(Entry.Button, { BackgroundTransparency = IsSelected and 0.92 or 1 }, "Snappy")
-			self.AnimateModule:Tween(Entry.Bar, { BackgroundTransparency = IsSelected and 0 or 1 }, "Snappy")
-			self.AnimateModule:Tween(Entry.CheckBox, { BackgroundColor3 = IsSelected and T.Accent or T.Lift }, "Snappy")
+			self.AnimateModule:Tween(Entry.Label,   { TextColor3 = IsSelected and T.White or T.Muted }, "Snappy")
+			self.AnimateModule:Tween(Entry.Button,  { BackgroundTransparency = IsSelected and 0.92 or 1 }, "Snappy")
+			self.AnimateModule:Tween(Entry.Bar,     { BackgroundTransparency = IsSelected and 0 or 1 }, "Snappy")
+			self.AnimateModule:Tween(Entry.CheckBox,    { BackgroundColor3 = IsSelected and T.Accent or T.Lift }, "Snappy")
 			self.AnimateModule:Tween(Entry.CheckStroke, { Color = IsSelected and T.Accent or T.Wire }, "Snappy")
-			self.AnimateModule:Tween(Entry.CheckMark, { TextTransparency = IsSelected and 0 or 1 }, "Snappy")
+			self.AnimateModule:Tween(Entry.CheckMark,   { TextTransparency = IsSelected and 0 or 1 }, "Snappy")
 		end
 	end
-
 	self.SelectedLabel.Text = self:GetDisplayText()
-
 	if self.Flag and self.ConfigModule then
 		self.ConfigModule:Set(self.Flag, self.Value)
 	end
-
 	if self.Callback then
 		local Selected = {}
 		for _, Opt in ipairs(self.Options) do
@@ -396,21 +383,24 @@ function Dropdown:SetValue(Value)
 	local T = self.Theme
 	self.Value = Value
 	self.SelectedLabel.Text = self:GetDisplayText()
-
 	for _, Entry in ipairs(self.OptionButtons) do
 		local IsSelected = Entry.Value == Value
-		self.AnimateModule:Tween(Entry.Label, { TextColor3 = IsSelected and T.White or T.Muted }, "Snappy")
+		self.AnimateModule:Tween(Entry.Label,  { TextColor3 = IsSelected and T.White or T.Muted }, "Snappy")
 		self.AnimateModule:Tween(Entry.Button, { BackgroundTransparency = IsSelected and 0.92 or 1 }, "Snappy")
-		self.AnimateModule:Tween(Entry.Bar, { BackgroundTransparency = IsSelected and 0 or 1 }, "Snappy")
+		self.AnimateModule:Tween(Entry.Bar,    { BackgroundTransparency = IsSelected and 0 or 1 }, "Snappy")
 	end
-
 	if self.Flag and self.ConfigModule then
 		self.ConfigModule:Set(self.Flag, Value)
 	end
-
 	if self.Callback then
 		pcall(self.Callback, Value)
 	end
+end
+
+function Dropdown:SetOptions(NewOptions)
+	self.Options = NewOptions
+	self.ListHeight = #NewOptions * 28
+	self:BuildOptions()
 end
 
 function Dropdown:GetValue()
@@ -424,19 +414,6 @@ function Dropdown:GetValue()
 		return Selected
 	end
 	return self.Value
-end
-
-function Dropdown:SetOptions(NewOptions)
-	self.Options = NewOptions
-	for _, Entry in ipairs(self.OptionButtons) do
-		Entry.Button:Destroy()
-	end
-	self.OptionButtons = {}
-	for _, Conn in ipairs(self.Connections) do
-		if Conn.Connected then Conn:Disconnect() end
-	end
-	self.Connections = {}
-	self:Build(self.Frame.Parent)
 end
 
 function Dropdown:ApplyTheme(T)
