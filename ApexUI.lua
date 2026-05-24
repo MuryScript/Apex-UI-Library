@@ -1,184 +1,362 @@
-local ApexUI = {}
-ApexUI.__index = ApexUI
+local BootScreen = {}
+BootScreen.__index = BootScreen
 
-local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local RunService = game:GetService("RunService")
 local CoreGui = game:GetService("CoreGui")
+local Players = game:GetService("Players")
 
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
-local Version = "1.0.0"
-local Initialized = false
-local Windows = {}
-local LoadedModules = {}
-
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "ApexUI"
-ScreenGui.ResetOnSpawn = false
-ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-ScreenGui.DisplayOrder = 999
-
-local GuiSuccess = pcall(function()
-   ScreenGui.Parent = CoreGui
-end)
-
-if not GuiSuccess then
-   ScreenGui.Parent = PlayerGui
-end
-
-local BaseUrl = "https://raw.githubusercontent.com/MuryScript/Apex-UI-Library/main/"
-
-local function Fetch(Path)
-   if LoadedModules[Path] then
-   	return LoadedModules[Path]
-   end
-   local Success, Result = pcall(function()
-   	return loadstring(game:HttpGet(BaseUrl .. Path))()
-   end)
-   assert(Success, "[ApexUI] Failed to load: " .. Path)
-   LoadedModules[Path] = Result
-   return Result
-end
-
-local ThemeModule
-local AnimateModule
-local UtilModule
-local ConfigModule
-local NotificationModule
-local PluginModule
-
-function ApexUI:Init(Options)
-   if Initialized then return self end
-   Options = Options or {}
-
-   ThemeModule        = Fetch("Core/Theme.lua")
-   AnimateModule      = Fetch("Core/Animate.lua")
-   UtilModule         = Fetch("Core/Util.lua")
-   ConfigModule       = Fetch("Core/Config.lua")
-   NotificationModule = Fetch("Layout/Notification.lua")
-   PluginModule       = Fetch("Plugins/PluginHandler.lua")
-
-   Fetch("Components/Window.lua")
-   Fetch("Components/Tab.lua")
-   Fetch("Components/Section.lua")
-   Fetch("Components/Toggle.lua")
-   Fetch("Components/Slider.lua")
-   Fetch("Components/Dropdown.lua")
-   Fetch("Components/Keybind.lua")
-   Fetch("Components/Button.lua")
-   Fetch("Components/TextInput.lua")
-   Fetch("Components/ColorPicker.lua")
-   Fetch("Components/Label.lua")
-   Fetch("Components/Separator.lua")
-   Fetch("Layout/Topbar.lua")
-   Fetch("Layout/Mobile.lua")
-   Fetch("Layout/BootScreen.lua")
-
-   if Options.Theme then
-   	ThemeModule:Set(Options.Theme)
-   end
-
-   if Options.ConfigKey then
-   	ConfigModule:SetKey(Options.ConfigKey)
-   	ConfigModule:Load()
-   end
-
-   NotificationModule:Init(ScreenGui)
-   PluginModule:Init(self)
-
-   local BootModule = LoadedModules["Layout/BootScreen.lua"]
-   BootModule.New({
-      Window = Windows[1] or nil,
-   	Title = "APEX UI",
-      SubTitle = "SYSTEM BOOT",
-   	OnDone    = function()
-   		for _, W in ipairs(Windows) do
-   			W.Root.Position = UDim2.new(0.5, -W.Size.X.Offset / 2, 0.5, -W.Size.Y.Offset / 2)
-   		end
-   	end,
-   })
-
-   Initialized = true
+function BootScreen.New(Options)
+   local self = setmetatable({}, BootScreen)
+   self.OnDone   = Options.OnDone or function() end
+   self.Window   = Options.Window
+   self.Title    = Options.Title or "APEX UI"
+   self.SubTitle = Options.SubTitle or "SYSTEM BOOT"
+   self.Lines    = Options.Lines or {
+   	"INITIALIZING APEX RUNTIME...",
+   	"LOADING MODULE :: core/renderer",
+   	"LOADING MODULE :: core/input",
+   	"LOADING MODULE :: core/theme",
+   	"LOADING MODULE :: core/animate",
+   	"LOADING MODULE :: components/ui",
+   	"ATTACHING TO PROCESS...",
+   	"BYPASS ACTIVE // STEALTH MODE ON",
+   	"STATUS: READY",
+   }
+   self:Build()
+   self:Play()
    return self
 end
 
-function ApexUI:CreateWindow(Options)
-   assert(Initialized, "[ApexUI] Call ApexUI:Init() before CreateWindow()")
-   Options = Options or {}
+function BootScreen:Build()
+   self.Gui = Instance.new("ScreenGui")
+   self.Gui.Name = "ApexBoot"
+   self.Gui.ResetOnSpawn = false
+   self.Gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+   self.Gui.DisplayOrder = 99999
+   self.Gui.IgnoreGuiInset = true
 
-   local WindowModule = LoadedModules["Components/Window.lua"]
-   local W = WindowModule.New({
-   	Title              = Options.Title or "ApexUI",
-   	SubTitle           = Options.SubTitle or "v" .. Version,
-   	Theme              = ThemeModule:Get(),
-   	Size               = Options.Size or UDim2.new(0, 520, 0, 440),
-   	Position           = Options.Position or UDim2.new(0.5, -260, 0.5, -220),
-   	MinimizeKey        = Options.MinimizeKey or Enum.KeyCode.RightShift,
-   	ScreenGui          = ScreenGui,
-   	ThemeModule        = ThemeModule,
-   	AnimateModule      = AnimateModule,
-   	UtilModule         = UtilModule,
-   	ConfigModule       = ConfigModule,
-   	NotificationModule = NotificationModule,
-   })
-
-   table.insert(Windows, W)
-   return W
-end
-
-function ApexUI:Notify(Options)
-   assert(Initialized, "[ApexUI] Call ApexUI:Init() before Notify()")
-   Options = Options or {}
-   NotificationModule:Send({
-   	Title    = Options.Title or "Notification",
-   	Content  = Options.Content or "",
-   	Duration = Options.Duration or 4,
-   	Type     = Options.Type or "Info",
-   })
-end
-
-function ApexUI:SetTheme(Name)
-   assert(Initialized, "[ApexUI] Call ApexUI:Init() before SetTheme()")
-   ThemeModule:Set(Name)
-   for _, W in ipairs(Windows) do
-   	W:ApplyTheme(ThemeModule:Get())
+   local Ok = pcall(function()
+   	self.Gui.Parent = CoreGui
+   end)
+   if not Ok then
+   	self.Gui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui")
    end
+
+   self.Frame = Instance.new("Frame")
+   self.Frame.Name = "BootFrame"
+   self.Frame.Size = UDim2.new(1, 0, 1, 0)
+   self.Frame.Position = UDim2.new(0, 0, 0, 0)
+   self.Frame.BackgroundColor3 = Color3.fromHex("080809")
+   self.Frame.BorderSizePixel = 0
+   self.Frame.ZIndex = 1
+   self.Frame.Parent = self.Gui
+
+   local ScanLine = Instance.new("Frame")
+   ScanLine.Name = "ScanLine"
+   ScanLine.Size = UDim2.new(1, 0, 0, 80)
+   ScanLine.Position = UDim2.new(0, 0, 0, -80)
+   ScanLine.BorderSizePixel = 0
+   ScanLine.BackgroundColor3 = Color3.new(1, 1, 1)
+   ScanLine.ZIndex = 2
+   ScanLine.Parent = self.Frame
+
+   local ScanGradient = Instance.new("UIGradient")
+   ScanGradient.Transparency = NumberSequence.new({
+   	NumberSequenceKeypoint.new(0, 1),
+   	NumberSequenceKeypoint.new(0.5, 0.95),
+   	NumberSequenceKeypoint.new(1, 1),
+   })
+   ScanGradient.Rotation = 90
+   ScanGradient.Parent = ScanLine
+
+   self.ScanConn = RunService.Heartbeat:Connect(function()
+   	local MaxY = self.Frame.AbsoluteSize.Y
+   	local Y = ScanLine.Position.Y.Offset
+   	ScanLine.Position = UDim2.new(0, 0, 0, Y > MaxY and -80 or Y + 2)
+   end)
+
+   local Screen = workspace.CurrentCamera.ViewportSize
+   local ContainerWidth = math.min(320, Screen.X * 0.8)
+
+   self.Container = Instance.new("Frame")
+   self.Container.Name = "Container"
+   self.Container.Size = UDim2.new(0, ContainerWidth, 0, 0)
+   self.Container.AutomaticSize = Enum.AutomaticSize.Y
+   self.Container.AnchorPoint = Vector2.new(0.5, 0.5)
+   self.Container.Position = UDim2.new(0.5, 0, 0.5, 0)
+   self.Container.BackgroundTransparency = 1
+   self.Container.ZIndex = 3
+   self.Container.Parent = self.Frame
+
+   local Layout = Instance.new("UIListLayout")
+   Layout.FillDirection = Enum.FillDirection.Vertical
+   Layout.Padding = UDim.new(0, 6)
+   Layout.SortOrder = Enum.SortOrder.LayoutOrder
+   Layout.HorizontalAlignment = Enum.HorizontalAlignment.Left
+   Layout.Parent = self.Container
+
+   local HeaderRow = Instance.new("Frame")
+   HeaderRow.Size = UDim2.new(1, 0, 0, 22)
+   HeaderRow.BackgroundTransparency = 1
+   HeaderRow.LayoutOrder = 1
+   HeaderRow.ZIndex = 3
+   HeaderRow.Parent = self.Container
+
+   local HeaderLayout = Instance.new("UIListLayout")
+   HeaderLayout.FillDirection = Enum.FillDirection.Horizontal
+   HeaderLayout.VerticalAlignment = Enum.VerticalAlignment.Center
+   HeaderLayout.Padding = UDim.new(0, 8)
+   HeaderLayout.Parent = HeaderRow
+
+   local LogoLabel = Instance.new("TextLabel")
+   LogoLabel.Size = UDim2.new(0, 18, 1, 0)
+   LogoLabel.BackgroundTransparency = 1
+   LogoLabel.Text = "⬡"
+   LogoLabel.TextColor3 = Color3.fromHex("d4d4e0")
+   LogoLabel.TextSize = 16
+   LogoLabel.Font = Enum.Font.GothamBold
+   LogoLabel.ZIndex = 3
+   LogoLabel.Parent = HeaderRow
+
+   self.TitleLabel = Instance.new("TextLabel")
+   self.TitleLabel.Size = UDim2.new(0, 0, 1, 0)
+   self.TitleLabel.AutomaticSize = Enum.AutomaticSize.X
+   self.TitleLabel.BackgroundTransparency = 1
+   self.TitleLabel.Text = ""
+   self.TitleLabel.TextColor3 = Color3.fromHex("eeeef4")
+   self.TitleLabel.TextSize = 13
+   self.TitleLabel.Font = Enum.Font.GothamBold
+   self.TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+   self.TitleLabel.ZIndex = 3
+   self.TitleLabel.Parent = HeaderRow
+
+   self.SubTitleLabel = Instance.new("TextLabel")
+   self.SubTitleLabel.Size = UDim2.new(1, 0, 0, 13)
+   self.SubTitleLabel.BackgroundTransparency = 1
+   self.SubTitleLabel.Text = ""
+   self.SubTitleLabel.TextColor3 = Color3.fromHex("6e6e82")
+   self.SubTitleLabel.TextSize = 10
+   self.SubTitleLabel.Font = Enum.Font.GothamBold
+   self.SubTitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+   self.SubTitleLabel.LayoutOrder = 2
+   self.SubTitleLabel.ZIndex = 3
+   self.SubTitleLabel.Parent = self.Container
+
+   local ProgressBg = Instance.new("Frame")
+   ProgressBg.Size = UDim2.new(1, 0, 0, 2)
+   ProgressBg.BackgroundColor3 = Color3.fromHex("18181d")
+   ProgressBg.BorderSizePixel = 0
+   ProgressBg.LayoutOrder = 3
+   ProgressBg.ZIndex = 3
+   ProgressBg.Parent = self.Container
+
+   local ProgressStroke = Instance.new("UIStroke")
+   ProgressStroke.Color = Color3.fromHex("32323e")
+   ProgressStroke.Thickness = 1
+   ProgressStroke.Parent = ProgressBg
+
+   self.ProgressBar = Instance.new("Frame")
+   self.ProgressBar.Size = UDim2.new(0, 0, 1, 0)
+   self.ProgressBar.BackgroundColor3 = Color3.fromHex("d4d4e0")
+   self.ProgressBar.BorderSizePixel = 0
+   self.ProgressBar.ZIndex = 4
+   self.ProgressBar.Parent = ProgressBg
+
+   local ProgressGlow = Instance.new("UIGradient")
+   ProgressGlow.Color = ColorSequence.new({
+   	ColorSequenceKeypoint.new(0, Color3.fromHex("9898aa")),
+   	ColorSequenceKeypoint.new(1, Color3.fromHex("eeeef4")),
+   })
+   ProgressGlow.Parent = self.ProgressBar
+
+   local Spacer = Instance.new("Frame")
+   Spacer.Size = UDim2.new(1, 0, 0, 4)
+   Spacer.BackgroundTransparency = 1
+   Spacer.LayoutOrder = 4
+   Spacer.Parent = self.Container
+
+   self.LinesContainer = Instance.new("Frame")
+   self.LinesContainer.Name = "Lines"
+   self.LinesContainer.Size = UDim2.new(1, 0, 0, 0)
+   self.LinesContainer.AutomaticSize = Enum.AutomaticSize.Y
+   self.LinesContainer.BackgroundTransparency = 1
+   self.LinesContainer.LayoutOrder = 5
+   self.LinesContainer.ZIndex = 3
+   self.LinesContainer.Parent = self.Container
+
+   local LinesLayout = Instance.new("UIListLayout")
+   LinesLayout.FillDirection = Enum.FillDirection.Vertical
+   LinesLayout.Padding = UDim.new(0, 4)
+   LinesLayout.SortOrder = Enum.SortOrder.LayoutOrder
+   LinesLayout.Parent = self.LinesContainer
+
+   task.spawn(function()
+   	task.wait(0.1)
+   	for I = 1, #self.Title do
+   		task.wait(0.03)
+   		if self.TitleLabel and self.TitleLabel.Parent then
+   			self.TitleLabel.Text = self.Title:sub(1, I)
+   		end
+   	end
+   	task.wait(0.05)
+   	for I = 1, #self.SubTitle do
+   		task.wait(0.02)
+   		if self.SubTitleLabel and self.SubTitleLabel.Parent then
+   			self.SubTitleLabel.Text = self.SubTitle:sub(1, I)
+   		end
+   	end
+   end)
 end
 
-function ApexUI:GetTheme()
-   return ThemeModule:GetName()
-end
+function BootScreen:AddLine(Text, Index, Total)
+   local IsLast = Index == Total
 
-function ApexUI:GetThemes()
-   return ThemeModule:GetAll()
-end
+   local Row = Instance.new("Frame")
+   Row.Size = UDim2.new(1, 0, 0, 12)
+   Row.BackgroundTransparency = 1
+   Row.LayoutOrder = Index
+   Row.ZIndex = 3
+   Row.Parent = self.LinesContainer
 
-function ApexUI:SaveConfig()
-   assert(Initialized, "[ApexUI] Call ApexUI:Init() before SaveConfig()")
-   return ConfigModule:Save()
-end
+   local Arrow = Instance.new("TextLabel")
+   Arrow.Size = UDim2.new(0, 14, 1, 0)
+   Arrow.BackgroundTransparency = 1
+   Arrow.Text = ">"
+   Arrow.TextColor3 = Color3.fromHex("272730")
+   Arrow.TextSize = 9
+   Arrow.Font = Enum.Font.GothamBold
+   Arrow.ZIndex = 3
+   Arrow.Parent = Row
 
-function ApexUI:LoadConfig()
-   assert(Initialized, "[ApexUI] Call ApexUI:Init() before LoadConfig()")
-   return ConfigModule:Load()
-end
+   local Label = Instance.new("TextLabel")
+   Label.Size = UDim2.new(1, -16, 1, 0)
+   Label.Position = UDim2.new(0, 16, 0, 0)
+   Label.BackgroundTransparency = 1
+   Label.Text = ""
+   Label.TextColor3 = IsLast and Color3.fromHex("eeeef4") or Color3.fromHex("6e6e82")
+   Label.TextSize = 9
+   Label.Font = Enum.Font.GothamBold
+   Label.TextXAlignment = Enum.TextXAlignment.Left
+   Label.ZIndex = 3
+   Label.Parent = Row
 
-function ApexUI:RegisterPlugin(Plugin)
-   assert(Initialized, "[ApexUI] Call ApexUI:Init() before RegisterPlugin()")
-   PluginModule:Register(Plugin)
-end
-
-function ApexUI:GetVersion()
-   return Version
-end
-
-function ApexUI:Destroy()
-   for _, W in ipairs(Windows) do
-   	W:Destroy()
+   for I = 1, #Text do
+   	task.delay(I * 0.016, function()
+   		if Label and Label.Parent then
+   			Label.Text = Text:sub(1, I)
+   		end
+   	end)
    end
-   Windows = {}
-   ScreenGui:Destroy()
-   Initialized = false
+
+   TweenService:Create(self.ProgressBar, TweenInfo.new(0.35, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
+   	Size = UDim2.new(Index / Total, 0, 1, 0),
+   }):Play()
 end
 
-return ApexUI
+function BootScreen:Play()
+   local Total = #self.Lines
+   local Index = 0
+
+   local function Next()
+   	if Index >= Total then
+   		task.wait(0.5)
+   		self:Dismiss()
+   		return
+   	end
+   	Index = Index + 1
+   	self:AddLine(self.Lines[Index], Index, Total)
+   	task.delay(0.22 + math.random() * 0.14, Next)
+   end
+
+   task.delay(0.5, Next)
+end
+
+function BootScreen:Dismiss()
+   if self.ScanConn then
+   	self.ScanConn:Disconnect()
+   end
+
+   local WinSize = self.Window and self.Window.Size
+
+   for _, Child in ipairs(self.LinesContainer:GetChildren()) do
+   	if Child:IsA("Frame") then
+   		for _, Label in ipairs(Child:GetChildren()) do
+   			if Label:IsA("TextLabel") then
+   				TweenService:Create(Label, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+   					TextTransparency = 1,
+   				}):Play()
+   			end
+   		end
+   	end
+   end
+
+   TweenService:Create(self.TitleLabel, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+   	TextTransparency = 1,
+   }):Play()
+
+   TweenService:Create(self.SubTitleLabel, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+   	TextTransparency = 1,
+   }):Play()
+
+   TweenService:Create(self.ProgressBar, TweenInfo.new(0.18, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+   	BackgroundTransparency = 1,
+   }):Play()
+
+   task.wait(0.22)
+
+   if not WinSize then
+   	TweenService:Create(self.Frame, TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+   		BackgroundTransparency = 1,
+   	}):Play()
+   	task.delay(0.55, function()
+   		self.Gui:Destroy()
+   		self.OnDone()
+   	end)
+   	return
+   end
+
+   local TargetSize = UDim2.new(0, WinSize.X.Offset, 0, WinSize.Y.Offset)
+
+   self.Container.AutomaticSize = Enum.AutomaticSize.None
+   self.Container.ClipsDescendants = true
+   self.Container.BackgroundTransparency = 0
+   self.Container.BackgroundColor3 = Color3.fromHex("0d0d0f")
+
+   local ContainerCorner = Instance.new("UICorner")
+   ContainerCorner.CornerRadius = UDim.new(0, 4)
+   ContainerCorner.Parent = self.Container
+
+   local ContainerStroke = Instance.new("UIStroke")
+   ContainerStroke.Color = Color3.fromHex("272730")
+   ContainerStroke.Thickness = 1
+   ContainerStroke.Parent = self.Container
+
+   TweenService:Create(self.Frame, TweenInfo.new(0.6, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+   	BackgroundTransparency = 1,
+   }):Play()
+
+   TweenService:Create(self.Container, TweenInfo.new(0.65, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
+   	Size = TargetSize,
+   }):Play()
+
+   task.delay(0.6, function()
+   	if self.Window then
+   		self.Window.Root.Visible = true
+   		self.Window.Root.Size = TargetSize
+   		self.Window.Root.Position = UDim2.new(0.5, -WinSize.X.Offset / 2, 0.5, -WinSize.Y.Offset / 2)
+   		self.Window.Root.BackgroundTransparency = 0
+   	end
+
+   	TweenService:Create(self.Container, TweenInfo.new(0.2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
+   		BackgroundTransparency = 1,
+   	}):Play()
+
+   	task.delay(0.22, function()
+   		self.Gui:Destroy()
+   		self.OnDone()
+   	end)
+   end)
+end
+
+return BootScreen
