@@ -142,14 +142,13 @@ function Window:Build()
 	LogoStroke.Thickness = 1
 	LogoStroke.Parent = LogoFrame
 
-	local LogoLabel = Instance.new("TextLabel")
-	LogoLabel.Size = UDim2.new(1, 0, 1, 0)
-	LogoLabel.BackgroundTransparency = 1
-	LogoLabel.Text = "⬡"
-	LogoLabel.TextColor3 = T.Bright
-	LogoLabel.TextSize = 11
-	LogoLabel.Font = Enum.Font.GothamBold
-	LogoLabel.Parent = LogoFrame
+	local LogoImage = Instance.new("ImageLabel")
+	LogoImage.Size = UDim2.new(1, 0, 1, 0)
+	LogoImage.BackgroundTransparency = 1
+	LogoImage.Image = "rbxassetid://85798284091961"
+	LogoImage.ImageColor3 = Color3.fromRGB(255, 255, 255)
+	LogoImage.ScaleType = Enum.ScaleType.Fit
+	LogoImage.Parent = LogoFrame
 
 	self.ContentArea = Instance.new("Frame")
 	self.ContentArea.Name = "ContentArea"
