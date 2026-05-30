@@ -16,14 +16,21 @@ local function LazyLoad(Path)
 	return Result
 end
 
+local function GetScaledSize()
+	local Viewport = workspace.CurrentCamera.ViewportSize
+	local Width = math.clamp(math.floor(Viewport.X * 0.52), 380, 700)
+	local Height = math.clamp(math.floor(Viewport.Y * 0.62), 300, 560)
+	return UDim2.new(0, Width, 0, Height)
+end
+
 function Window.New(Options)
 	local Self = setmetatable({}, Window)
 
 	Self.Title = Options.Title or "ApexUI"
 	Self.SubTitle = Options.SubTitle or ""
 	Self.Theme = Options.Theme
-	Self.Size = Options.Size or UDim2.new(0.42, 0, 0.6, 0)
-	Self.Position = Options.Position or UDim2.new(0.5, 0, 0.5, 0)
+	Self.Size = Options.Size or GetScaledSize()
+	Self.Position = Options.Position or UDim2.new(0.5, -Self.Size.X.Offset / 2, 0.5, -Self.Size.Y.Offset / 2)
 	Self.MinimizeKey = Options.MinimizeKey or Enum.KeyCode.RightShift
 	Self.ScreenGui = Options.ScreenGui
 	Self.ThemeModule = Options.ThemeModule
@@ -56,8 +63,7 @@ function Window:Build()
 
 	self.Root = Instance.new("Frame")
 	self.Root.Name = "ApexWindow"
-	self.Root.AnchorPoint = Vector2.new(0.5, 0.5)
-	self.Root.Size = UDim2.new(self.Size.X.Scale, self.Size.X.Offset, 0, 0)
+	self.Root.Size = UDim2.new(0, self.Size.X.Offset, 0, 0)
 	self.Root.Position = self.Position
 	self.Root.BackgroundColor3 = T.Deep
 	self.Root.BackgroundTransparency = 1
@@ -164,7 +170,7 @@ end
 
 function Window:OpenAnimation()
 	self.Root.Visible = true
-	self.Root.Size = UDim2.new(self.Size.X.Scale, self.Size.X.Offset, 0, 0)
+	self.Root.Size = UDim2.new(0, self.Size.X.Offset, 0, 0)
 	self.Root.BackgroundTransparency = 1
 
 	TweenService:Create(self.Root, TweenInfo.new(0.12, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
@@ -277,7 +283,7 @@ end
 function Window:Show()
 	self.Visible = true
 	self.Root.Visible = true
-	self.Root.Size = UDim2.new(self.Size.X.Scale, self.Size.X.Offset, 0, 0)
+	self.Root.Size = UDim2.new(0, self.Size.X.Offset, 0, 0)
 	self.Root.BackgroundTransparency = 1
 
 	TweenService:Create(self.Root, TweenInfo.new(0.1, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {
@@ -295,7 +301,7 @@ function Window:Hide()
 	self.Visible = false
 
 	TweenService:Create(self.Root, TweenInfo.new(0.25, Enum.EasingStyle.Quart, Enum.EasingDirection.In), {
-		Size = UDim2.new(self.Size.X.Scale, self.Size.X.Offset, 0, 0),
+		Size = UDim2.new(0, self.Size.X.Offset, 0, 0),
 		BackgroundTransparency = 1,
 	}):Play()
 
